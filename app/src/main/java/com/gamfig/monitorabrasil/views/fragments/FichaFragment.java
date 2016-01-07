@@ -18,12 +18,12 @@ import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.views.util.Card;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Grafico;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
-import com.gamfig.monitorabrasil.views.adapters.GastoAdapter;
+import com.gamfig.monitorabrasil.views.adapters.PresencaAdapter;
 import com.gamfig.monitorabrasil.views.dialogs.DialogAvaliacao;
+import com.gamfig.monitorabrasil.views.util.Card;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -51,7 +51,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
     private ActionsCreator actionsCreator;
     private PoliticoStore politicoStore;
     private RecyclerView mRecyclerView;
-    private GastoAdapter mAdapter;
+    private PresencaAdapter mAdapter;
     private RatingBar mRatingBar;
 
     private PieChart mChart;
@@ -97,6 +97,10 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         politico = actionsCreator.getPolitico(idPolitico);
         setupView(rootView);
         actionsCreator.getComparacaoGasto(politico.getObjectId());
+        
+        //so tem presenca para os deputados
+        if(politico.getString("tipo").equals("c"))
+            actionsCreator.getPresenca(politico.getString("idMatricula"));
 
         return rootView;
     }
@@ -120,7 +124,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(llm);
-        mAdapter = new GastoAdapter(actionsCreator);
+        mAdapter = new PresencaAdapter(actionsCreator);
         mRecyclerView.setAdapter(mAdapter);
       //  mAdapter.setRecyclerViewOnClickListenerHack(this);
 
@@ -202,10 +206,23 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
      */
     @Subscribe
     public void onTodoStoreChange(PoliticoStore.PoliticoStoreChangeEvent event) {
-        if(event.getEvento().equals(PoliticoActions.POLITICO_GET_COMPARACAO_GASTO))
-            updateCardComparacao();
+        String evento =event.getEvento();
+        
+        switch (evento){
+            case PoliticoActions.POLITICO_GET_COMPARACAO_GASTO:
+                updateCardComparacao();
+                break;
+            case PoliticoActions.POLITICO_GET_PRESENCA:
+                carregaPresenca();
+                break;
+        }
+            
     }
 
+    private void carregaPresenca() {
+        List<ParseObject> presencas = politicoStore.getPresenca();
+        mAdapter.setItems(presencas);
+    }
 
 
     @Override

@@ -662,6 +662,28 @@ public class ActionsCreator {
         });
     }
 
+    public void getPresenca(String idMatricula) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Presenca");
+        query.whereEqualTo("id_matricula",idMatricula);
+        query.addDescendingOrder("nr_ano");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, com.parse.ParseException e) {
+                if (e == null) {
+                    dispatcher.dispatch(
+                            PoliticoActions.POLITICO_GET_PRESENCA,
+                            PoliticoActions.KEY_TEXT, list
+                    );
+                } else {
+                    dispatcher.dispatch(
+                            PoliticoActions.POLITICO_GET_PRESENCA,
+                            PoliticoActions.KEY_TEXT, "erro"
+                    );
+                }
+            }
+        });
+    }
+
 
     /**
      * Busca os gastos de um politico

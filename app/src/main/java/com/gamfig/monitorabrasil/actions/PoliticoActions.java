@@ -11,6 +11,7 @@ public interface PoliticoActions {
     String POLITICO_GET_PROJETOS = "politico_get_projetos";
     String POLITICO_GET_ALL = "politico_get_all";
     String POLITICO_GET_COMPARACAO_GASTO = "politico_get_comparacao_gasto";
+    String POLITICO_GET_PRESENCA = "politico_get_presenca";
     String KEY_TEXT = "key-text";
     String KEY_ID = "key-id";
 
