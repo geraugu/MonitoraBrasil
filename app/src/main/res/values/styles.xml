@@ -1,0 +1,98 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+    <!-- Style arrow -->
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <!-- this will set your arrow color -->
+        <item name="color">@android:color/black</item>
+
+        <!-- You can customize other stuff too -->
+        <item name="spinBars">true</item>
+        <item name="thickness">3dp</item>
+        <!-- <item name="barSize">21dp</item>-->
+        <item name="drawableSize">48dp</item>
+
+    </style>
+
+    <style name="Widget.CardContent" parent="android:Widget">
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">24dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="botao">
+        <item name="android:textColor">@color/icons</item>
+        <item name="android:background">@color/colorAccent</item>
+    </style>
+
+    <style name="TextAppearance.MaterialSheetFab.Sheet.Item" parent="">
+        <item name="android:layout_width">@dimen/sheet_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">@dimen/sheet_item_spacing</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textSize">@dimen/sheet_item_textsize</item>
+        <item name="android:textColor">@color/text_black_87</item>
+        <item name="android:drawablePadding">@dimen/sheet_item_image_spacing</item>
+    </style>
+
+    <style name="Widget.MaterialSheetFab.Note.List" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingTop">@dimen/note_spacing</item>
+        <item name="android:paddingLeft">@dimen/note_spacing</item>
+        <item name="android:paddingRight">@dimen/note_spacing</item>
+        <item name="android:paddingBottom">@dimen/fab_list_spacing</item>
+        <item name="android:clipToPadding">false</item>
+    </style>
+
+
+    <style name="Widget.MaterialSheetFab.Note" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/note_spacing</item>
+        <item name="android:foreground">?selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="contentPadding">@dimen/note_content_spacing</item>
+        <item name="cardBackgroundColor">@color/background_card</item>
+        <item name="cardCornerRadius">@dimen/note_corner_radius</item>
+    </style>
+
+
+    <style name="TextAppearance.MaterialSheetFab.Note" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_white_87</item>
+        <item name="android:textSize">@dimen/note_textsize</item>
+    </style>
+
+    <style name="TextAppearance.MaterialSheetFab.Note.Title" parent="TextAppearance.MaterialSheetFab.Note">
+        <item name="android:textSize">@dimen/note_title_textsize</item>
+    </style>
+
+
+</resources>

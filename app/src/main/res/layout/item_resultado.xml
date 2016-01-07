@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    style="@style/Widget.MaterialSheetFab.Note"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:id="@+id/imgPerfil"
+            android:layout_gravity="center_horizontal"
+            android:src="@mipmap/ic_action_like_green" />
+
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="XX"
+
+
+            android:id="@+id/txtQtdSim"
+            android:gravity="center"
+            android:textColor="@color/cor7"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+
+        <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="sdfadsf dal;fj dfj; dfla j;d fjklsjfdjldsfj l dj ldksf jlkdsfjlkdsjlj flds flkdsjfj"
+        android:id="@+id/txtResposta"
+        android:textSize="16dp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+            android:layout_toRightOf="@+id/imgPerfil"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="3dp" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

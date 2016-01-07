@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_dialoga" android:icon="@android:drawable/ic_menu_camera"
+            android:title="Dialoga, Cidadão!" />
+    </group>
+    <item android:title="Câmara dos Deputados">
+        <menu>
+            <item android:id="@+id/nav_deputados" android:icon="@android:drawable/ic_menu_share"
+                android:title="Deputados" />
+            <item android:id="@+id/nav_cotas" android:icon="@android:drawable/ic_menu_send"
+                android:title="Cotas" />
+            <item android:id="@+id/nav_projetos_camara" android:icon="@android:drawable/ic_menu_send"
+                android:title="Projetos" />
+        </menu>
+    </item>
+
+    <item android:title="Senado">
+        <menu>
+            <item android:id="@+id/nav_senadores" android:icon="@android:drawable/ic_menu_share"
+                android:title="Senadores" />
+            <item android:id="@+id/nav_projetos_senado" android:icon="@android:drawable/ic_menu_send"
+                android:title="Projetos" />
+        </menu>
+    </item>
+    <item android:title="Senado">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item android:id="@+id/nav_conf" android:icon="@android:drawable/ic_menu_manage"
+                    android:title="Configuração" />
+                <item android:id="@+id/nav_sobre" android:icon="@android:drawable/ic_menu_manage"
+                    android:title="Sobre" />
+            </group>
+        </menu>
+    </item>
+</menu>
