@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.gamfig.monitorabrasil">
+
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".application.AppController"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".views.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="fb370c047719aaf76293ffecd977d8476584bbee" />
+
+        <activity
+            android:name=".views.DialogaActivity"
+            android:label="@string/title_activity_dialoga"
+            android:parentActivityName=".views.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.MainActivity" />
+        </activity>
+        <activity
+            android:name=".views.ParlamentarListActivity"
+            android:label="@string/title_parlamentar_list"
+            android:parentActivityName=".views.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.MainActivity" />
+        </activity>
+        <activity
+            android:name=".views.ParlamentarDetailActivity"
+            android:label="@string/title_parlamentar_detail"
+            android:parentActivityName=".views.ParlamentarListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.ParlamentarListActivity" />
+        </activity>
+        <activity
+            android:name=".views.ComentarioActivity"
+            android:label="@string/title_activity_comentario"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".views.ProjetoListActivity"
+            android:label="@string/title_projeto_list"
+            android:parentActivityName=".views.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.MainActivity" />
+        </activity>
+        <activity
+            android:name=".views.ProjetoDetailActivity"
+            android:label="@string/title_projeto_detail"
+            android:parentActivityName=".views.ProjetoListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.ProjetoListActivity" />
+        </activity>
+
+    </application>
+
+</manifest>
