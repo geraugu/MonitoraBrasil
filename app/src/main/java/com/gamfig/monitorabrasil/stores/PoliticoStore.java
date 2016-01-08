@@ -25,6 +25,10 @@ public class PoliticoStore extends Store{
     private ParseObject politico;
     private Comparacao gasto;
 
+    public List<ParseObject> getPoliticosFiltro() {
+        return politicosFiltro;
+    }
+
     public List<ParseObject> getPresenca() {
         return presenca;
     }
@@ -98,7 +102,7 @@ public class PoliticoStore extends Store{
                 break;
 
             case PoliticoActions.POLITICO_GET_PRESENCA:
-                gasto = ((Comparacao) action.getData().get(PoliticoActions.KEY_TEXT));
+                presenca = ((List<ParseObject>) action.getData().get(PoliticoActions.KEY_TEXT));
                 emitStoreChange();
                 break;
         }

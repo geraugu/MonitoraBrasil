@@ -69,20 +69,20 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         final ParseObject projeto = projetos.get(i);
         viewHolder.projeto = projeto;
         //verifica se ja votou
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Voto");
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("VotoProposicao");
         query.fromLocalDatastore();
-        query.whereEqualTo("projeto", projeto);
+        query.whereEqualTo("id_proposicao", projeto.getNumber("id_proposicao"));
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
                 if (list.size() > 0) {
-                    String voto = list.get(0).get("voto").toString();
+                    String voto = list.get(0).get("tp_voto").toString();
                     viewHolder.projetoVotado = list.get(0);
                     if (voto.equals("s")) {
                         viewHolder.btnConcordo.setBackground(apoioVerde);
                         viewHolder.btnConcordo.setEnabled(false);
                         viewHolder.voto = "apoioado";
-                        ;
+
                     } else {
                         viewHolder.btnDiscordo.setBackground(napoioVermelho);
                         viewHolder.btnDiscordo.setEnabled(false);
@@ -92,42 +92,38 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
             }
         });
 
-        viewHolder.numero.setText("ID: "+projeto.getString("numero"));
-        if(projeto.get("classificacao")!= null)
-            viewHolder.classificacao.setText(projeto.get("classificacao").toString());
-        else
-            viewHolder.classificacao.setVisibility(View.GONE);
-        if(projeto.get("data")!= null)
-            viewHolder.data.setText(projeto.get("data").toString());
-        else
-            viewHolder.data.setText(projeto.get("dtLeitura").toString());
-        viewHolder.descricao.setText(projeto.get("descricao").toString());
+        viewHolder.numero.setText(projeto.getString("tx_nome"));
+
+        if(projeto.get("dt_apresentacao")!= null)
+            viewHolder.data.setText(projeto.get("dt_apresentacao").toString());
+
+        viewHolder.descricao.setText(projeto.get("txt_ementa").toString());
         int numComentario = 0;
         if(projeto.get("nr_comentarios") != null){
             numComentario = Integer.valueOf( projeto.get("nr_comentarios").toString());
         }
         viewHolder.btnComentar.setText(String.valueOf(numComentario));
         int num=0;
-        if(projeto.get("apoio") != null){
-            num = Integer.valueOf( projeto.get("apoio").toString());
+        if(projeto.get("nrVotosS") != null){
+            num =  projeto.getNumber("nrVotosS").intValue();
         }
 
         viewHolder.numApoio.setText(String.valueOf(num));
         num=0;
-        if(projeto.get("nao_apoio") != null){
-            num = Integer.valueOf( projeto.get("nao_apoio").toString());
+        if(projeto.get("nrVotosN") != null){
+            num = projeto.getNumber("nrVotosN").intValue();
         }
         viewHolder.numNaoApoio.setText(String.valueOf(num));
-        try {
-            if(projeto.getParseObject("politico")!= null) {
-                ParseObject autor = projeto.getParseObject("politico");
-
-                autor.fetchFromLocalDatastore();
-                viewHolder.autor.setText(autor.get("nome").toString());
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            if(projeto.getParseObject("politico")!= null) {
+//                ParseObject autor = projeto.getParseObject("politico").getString("idCadastro");
+//
+//                autor.fetchFromLocalDatastore();
+//                viewHolder.autor.setText(autor.get("nome").toString());
+//            }
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
 
         viewHolder.btnConcordo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,18 +190,18 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
 
         }
 
-        ParseObject voto = new ParseObject("Voto");
+        ParseObject voto = new ParseObject("VotoProposicao");
         voto.put("projeto", projeto);
         voto.put("user", ParseUser.getCurrentUser());
-        voto.put("voto", tipoVoto);
+        voto.put("tp_voto", tipoVoto);
         Button btnVoto = (Button) v;
         if(tipoVoto.equals("s")){
             if(votado){
                 viewHolder2.numNaoApoio.setText(String.valueOf(Integer.valueOf(viewHolder2.numNaoApoio.getText().toString()) - 1));
-                projeto.increment("nao_apoio", -1);
+                projeto.increment("nrVotosN", -1);
             }
             viewHolder2.numApoio.setText(String.valueOf(Integer.valueOf(viewHolder2.numApoio.getText().toString()) + 1));
-            projeto.increment("apoio");
+            projeto.increment("nrVotosS");
             btnVoto.setBackground(apoioVerde);
             viewHolder2.btnDiscordo.setBackground(napoio);
             viewHolder2.voto = "apoiado";
@@ -215,9 +211,9 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         }else{
             if(votado){
                 viewHolder2.numApoio.setText(String.valueOf(Integer.valueOf(viewHolder2.numApoio.getText().toString()) - 1));
-                projeto.increment("apoio", -1);
+                projeto.increment("nrVotosS", -1);
             }
-            projeto.increment("nao_apoio");
+            projeto.increment("nrVotosN");
             viewHolder2.numNaoApoio.setText(String.valueOf(Integer.valueOf(viewHolder2.numNaoApoio.getText().toString()) + 1));
             btnVoto.setBackground(napoioVermelho);
             viewHolder2.btnConcordo.setBackground(apoio);

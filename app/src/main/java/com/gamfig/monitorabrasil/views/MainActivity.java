@@ -322,8 +322,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.nav_projetos_camara) {
-            Intent intent = new Intent(this,ParlamentarListActivity.class);
-            intent.putExtra("parlamentar","deputado");
+            Intent intent = new Intent(this,ProjetoListActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_cotas) {

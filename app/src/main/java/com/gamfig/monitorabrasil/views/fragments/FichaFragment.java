@@ -187,13 +187,6 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
 
 
 
-    private void updateUI() {
-        List<ParseObject> gastos = politicoStore.getGastos();
-        mAdapter.setItems(gastos);
-
-//       Offset(0f);
-    }
-
     private void updateCardComparacao() {
         Comparacao comparacao = politicoStore.getGasto();
 

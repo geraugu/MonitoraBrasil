@@ -52,5 +52,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="procurar">Procurar</string>
+    <string name="filtrar">Filtrar</string>
+    <string name="uf">UF</string>
+    <string name="partido">Partido</string>
+    <string name="tipo">Tipo</string>
 
 </resources>

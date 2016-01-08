@@ -21,7 +21,9 @@ import com.parse.SignUpCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -916,5 +918,106 @@ public class ActionsCreator {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Busca os projetos de um politico
+     *
+     * @param idPolitico
+     * @param previousTotal
+     */
+    public void getAllProjetos(String idPolitico, int previousTotal) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Proposicao");
+        query.addDescendingOrder("nr_ano");
+        query.addDescendingOrder("tx_nome");
+        query.setLimit(15);
+        query.setSkip(previousTotal);
+
+        if(idPolitico!= null){
+//            ParseObject politico = ParseObject.createWithoutData("Politico",idPolitico);
+//            query.whereEqualTo("politico", politico);
+            query.whereEqualTo("id_autor",idPolitico);
+        }
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, com.parse.ParseException e) {
+                if (e == null) {
+                    dispatcher.dispatch(
+                            ProjetoActions.PROJETO_GET_TODOS,
+                            ProjetoActions.KEY_TEXT, list
+                    );
+                } else {
+                    dispatcher.dispatch(
+                            ProjetoActions.PROJETO_GET_TODOS,
+                            ProjetoActions.KEY_TEXT, "erro"
+                    );
+                }
+            }
+
+
+        });
+    }
+
+    /**
+     * Pesquisa de projetos
+     *
+     * @param chave pesquisa
+     */
+    public void buscaProjetoPorPalavra(String chave) {
+        chave =  "(?i).*"+chave+".*";
+        ParseQuery<ParseObject> query1 = ParseQuery.getQuery("Proposicao");
+        query1.whereMatches("txt_ementa",chave);
+
+        ParseQuery<ParseObject> query2 = ParseQuery.getQuery("Proposicao");
+        query2.whereMatches("txt_nome", chave);
+
+
+        List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
+        queries.add(query1);
+        queries.add(query2);
+
+        ParseQuery<ParseObject> query = ParseQuery.or(queries);
+        query.addDescendingOrder("nr_ano");
+        query.addDescendingOrder("tx_nome");
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, com.parse.ParseException e) {
+                if (e == null) {
+                    dispatcher.dispatch(
+                            ProjetoActions.PROJETO_GET_PROCURA,
+                            ProjetoActions.KEY_TEXT, list
+                    );
+                } else {
+                    dispatcher.dispatch(
+                            ProjetoActions.PROJETO_GET_PROCURA,
+                            ProjetoActions.KEY_TEXT, "erro"
+                    );
+                }
+            }
+
+
+        });
+    }
+
+    public List<String> getPartidos() {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Partido");
+        query.addAscendingOrder("nome");
+        List<ParseObject> partidos = null;
+        try {
+            partidos = query.find();
+            ParseObject.pinAll(partidos);
+            List<String> retorno = new ArrayList<>();
+            Iterator<ParseObject> it = partidos.iterator();
+            while (it.hasNext()){
+                ParseObject partido = it.next();
+                retorno.add(partido.getString("nome"));
+            }
+            return retorno;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+       return null;
     }
 }

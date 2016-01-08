@@ -164,6 +164,7 @@ public class ParlamentarListActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
             // activity, the Up button is shown. Use NavUtils to allow users
@@ -180,7 +181,11 @@ public class ParlamentarListActivity extends AppCompatActivity
 
     @Override
     public void onClickListener(View view, int position) {
-        final ParseObject politico = politicoStore.getPoliticos().get(position);
+        final ParseObject politico;
+        if(realizouBusca)
+            politico = politicoStore.getPoliticosFiltro().get(position);
+        else
+            politico = politicoStore.getPoliticos().get(position);
         if (mTwoPane) {
 //            Bundle arguments = new Bundle();
 //            arguments.putString(VereadorDetailFragment.ID_POLITICO,politico.getObjectId());

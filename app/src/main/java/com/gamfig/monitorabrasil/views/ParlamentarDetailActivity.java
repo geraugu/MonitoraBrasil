@@ -20,6 +20,7 @@ import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.fragments.FichaFragment;
 import com.gamfig.monitorabrasil.views.fragments.GastosFragment;
+import com.gamfig.monitorabrasil.views.fragments.ProjetosFragment;
 import com.gamfig.monitorabrasil.views.fragments.TwitterFragment;
 import com.parse.ParseObject;
 import com.squareup.otto.Bus;
@@ -136,8 +137,13 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         }
 
         //PROJETOS
+        ProjetosFragment projetosFragment = ProjetosFragment.newInstance(politico.getObjectId());
+        adapter.addFrag(projetosFragment, "Projetos");
 
         //HASHTAG
+
+        //BENS
+
 
 
         viewPager.setAdapter(adapter);
