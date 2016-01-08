@@ -113,7 +113,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
 
     private void setupView(View rootView) {
         mView= rootView;
-        mRatingBar = (RatingBar)rootView.findViewById(R.id.ratingBar);
+        mRatingBar = (RatingBar)rootView.findViewById(R.id.ratingBar2);
         //tableview
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view_presenca);
 

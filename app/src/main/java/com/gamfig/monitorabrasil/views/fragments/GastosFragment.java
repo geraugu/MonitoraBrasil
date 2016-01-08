@@ -172,14 +172,14 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     public void onResume() {
         super.onResume();
         dispatcher.register(this);
-        dispatcher.register(politicoStore);
+      //  dispatcher.register(politicoStore);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         dispatcher.unregister(this);
-        dispatcher.unregister(politicoStore);
+   //     dispatcher.unregister(politicoStore);
     }
 
     @Override

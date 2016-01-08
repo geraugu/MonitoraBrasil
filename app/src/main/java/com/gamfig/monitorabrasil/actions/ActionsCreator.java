@@ -886,7 +886,7 @@ public class ActionsCreator {
                         Comparacao comparacao = new Comparacao();
                         comparacao.setProduto(json.getString("produto"));
                         comparacao.setValor((float) json.getDouble("conta"));
-                        comparacao.setCota((ParseObject) json.get("cota"));
+                        comparacao.setCota(buscaCota(json.getString("id")));
                         dispatcher.dispatch(
                                 PoliticoActions.POLITICO_GET_COMPARACAO_GASTO,
                                 PoliticoActions.KEY_TEXT,comparacao
@@ -904,5 +904,17 @@ public class ActionsCreator {
                 }
             }
         });
+    }
+
+    private ParseObject buscaCota(String id) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("CotaPorCategoriaPercentual");
+        try {
+            ParseObject cota = query.get(id);
+            return cota;
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

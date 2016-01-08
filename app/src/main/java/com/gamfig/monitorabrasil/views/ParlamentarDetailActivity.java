@@ -18,6 +18,7 @@ import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
+import com.gamfig.monitorabrasil.views.fragments.FichaFragment;
 import com.gamfig.monitorabrasil.views.fragments.GastosFragment;
 import com.gamfig.monitorabrasil.views.fragments.TwitterFragment;
 import com.parse.ParseObject;
@@ -122,7 +123,8 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         //DADOS GERAIS
-
+        FichaFragment fichaFragment = FichaFragment.newInstance(politico.getObjectId());
+        adapter.addFrag(fichaFragment,"Geral");
         //GASTOS
         GastosFragment fragment = GastosFragment.newInstance(politico.getObjectId());
         adapter.addFrag(fragment, "Gastos");
