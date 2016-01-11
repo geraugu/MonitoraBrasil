@@ -30,6 +30,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".views.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:parentActivityName=".views.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.MainActivity" />
+        </activity>
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -53,6 +62,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.gamfig.monitorabrasil.views.MainActivity" />
         </activity>
+
         <activity
             android:name=".views.ParlamentarDetailActivity"
             android:label="@string/title_parlamentar_detail"

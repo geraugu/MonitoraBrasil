@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -53,6 +54,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
     private RecyclerView mRecyclerView;
     private PresencaAdapter mAdapter;
     private RatingBar mRatingBar;
+    private NestedScrollView mNestedScroll;
 
     private PieChart mChart;
     private Typeface tf;
@@ -92,6 +94,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_ficha, container, false);
+        mNestedScroll = (NestedScrollView)rootView;
         initDependencies();
         //busca as informacoes do politico
         politico = actionsCreator.getPolitico(idPolitico);
@@ -100,7 +103,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         
         //so tem presenca para os deputados
         if(politico.getString("tipo").equals("c"))
-            actionsCreator.getPresenca(politico.getString("idMatricula"));
+            actionsCreator.getPresenca(politico);
 
         return rootView;
     }
@@ -191,6 +194,8 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         Comparacao comparacao = politicoStore.getGasto();
 
         new Card().montaCardComparacaoGasto(mView,politico,comparacao);
+
+        mNestedScroll.scrollTo(0, 0);
     }
 
     /**
@@ -215,6 +220,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
     private void carregaPresenca() {
         List<ParseObject> presencas = politicoStore.getPresenca();
         mAdapter.setItems(presencas);
+        mNestedScroll.scrollTo(0, 0);
     }
 
 

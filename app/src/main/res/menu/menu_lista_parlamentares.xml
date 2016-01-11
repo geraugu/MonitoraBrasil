@@ -7,4 +7,9 @@
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="Search"/>
+    <item
+        android:id="@+id/action_filter"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        app:showAsAction="always"
+        android:title="@string/filtrar"/>
 </menu>

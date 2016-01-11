@@ -4,21 +4,23 @@
     android:layout_height="400dp"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:padding="6dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/uf"
         android:id="@+id/lblUf"
-        android:textSize="25dp"
+        android:textSize="20dp"
         android:layout_marginTop="16dp" />
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/spnUf"
         android:layout_alignBaseline="@+id/lblUf"
-        android:layout_toRightOf="@+id/lblPartido"/>
+        android:layout_toRightOf="@+id/lblPartido"
+        android:spinnerMode="dropdown" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -26,7 +28,7 @@
         android:text="@string/partido"
         android:id="@+id/lblPartido"
         android:layout_below="@id/spnUf"
-        android:textSize="25dp" />
+        android:textSize="20dp" />
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,7 +47,7 @@
         android:layout_width="97dp"
         android:layout_height="wrap_content"
         android:text="@string/tipo"
-        android:textSize="25dp" />
+        android:textSize="20dp" />
 
 
     <Spinner

@@ -63,6 +63,13 @@ public class DialogFiltro extends DialogFragment {
                 getContext(), R.array.todasufs, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnUf.setAdapter(adapter);
+        if(actionsCreator.getItemConfiguracao("ufPosSelecionada")!= null){
+            int ufPos = Integer.valueOf(actionsCreator.getItemConfiguracao("ufPosSelecionada"));
+            if(ufPos > 0){
+                spnUf.setSelection(ufPos,true);
+            }
+
+        }
 
         spnPartido = (Spinner) view.findViewById(R.id.spnPartido);
         ArrayAdapter<String> adapterPartido = new ArrayAdapter<String>(getContext(),
@@ -85,7 +92,9 @@ public class DialogFiltro extends DialogFragment {
 
             @Override
             public void onClick(final View v) {
-
+                //salva os filtros selecionados
+                int ufSelecionadaPosition = spnUf.getSelectedItemPosition();
+                actionsCreator.salvaParametroConfiguracao("ufPosSelecionada",String.valueOf(ufSelecionadaPosition));
                 getDialog().dismiss();
             }
         });

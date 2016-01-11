@@ -53,7 +53,11 @@ public class ProjetoStore extends Store{
 
         switch (action.getType()) {
             case ProjetoActions.PROJETO_GET_TODOS:
-                projetos = ((List<ParseObject>) action.getData().get(ProjetoActions.KEY_TEXT));
+                projetos.addAll((List<ParseObject>) action.getData().get(ProjetoActions.KEY_TEXT));
+                emitStoreChange();
+                break;
+            case ProjetoActions.PROJETO_GET_PROCURA:
+                projetos.addAll((List<ParseObject>) action.getData().get(ProjetoActions.KEY_TEXT));
                 emitStoreChange();
                 break;
 

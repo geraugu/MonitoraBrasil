@@ -22,6 +22,10 @@ public class MyValueFormatter implements ValueFormatter {
 
     }
 
+    public void setMaximoDigitos(int digitos){
+        mFormat.setMaximumFractionDigits(digitos);
+    }
+
 
     @Override
     public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {

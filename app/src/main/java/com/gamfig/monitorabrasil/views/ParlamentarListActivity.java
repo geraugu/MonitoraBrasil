@@ -66,7 +66,8 @@ public class ParlamentarListActivity extends AppCompatActivity
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
-    private String tipo;//camara ou senado
+    private String casa;//camara ou senado
+    private String ordem;
 
     private boolean realizouBusca;
 
@@ -91,21 +92,24 @@ public class ParlamentarListActivity extends AppCompatActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Lista Politicos")
-                .putContentType(tipo));
-
         initDependencies();
 
         if(getIntent().getExtras() != null){
-            if(getIntent().getExtras().getString("tipo") != null) {
-                tipo = getIntent().getExtras().getString("tipo");
-                actionsCreator.salvaTipoPolitico(tipo);
+            //casa e ordem sao passados
+            if(getIntent().getExtras().getString("casa") != null) {
+                casa = getIntent().getExtras().getString("casa");
+                actionsCreator.salvaParametroConfiguracao("casa",casa);
+                ordem = getIntent().getExtras().getString("ordem");
+                actionsCreator.salvaParametroConfiguracao("ordem",getIntent().getExtras().getString("ordem"));
             }
         }else {
-            tipo = actionsCreator.getTipoPolitico();
+            casa = actionsCreator.getItemConfiguracao("casa");
+            ordem = actionsCreator.getItemConfiguracao("ordem");
         }
+        Answers.getInstance().logContentView(new ContentViewEvent()
+                .putContentName("Lista Politicos")
+                .putContentType(casa)
+                .putContentId(ordem));
 
         setupView();
         if (findViewById(R.id.parlamentar_detail_container) != null) {
@@ -122,9 +126,8 @@ public class ParlamentarListActivity extends AppCompatActivity
                     .setActivateOnItemClick(true);
         }
 
-        actionsCreator.getAllPoliticos(tipo);
+        actionsCreator.getAllPoliticos(casa,ordem);
 
-        // TODO: If exposing deep links into your app, handle intents here.
     }
 
 
@@ -147,7 +150,7 @@ public class ParlamentarListActivity extends AppCompatActivity
         LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(llm);
-        mAdapter = new PoliticoAdapter(actionsCreator,tipo);
+        mAdapter = new PoliticoAdapter(actionsCreator,casa);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setRecyclerViewOnClickListenerHack(this);
 

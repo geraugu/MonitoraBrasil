@@ -3,29 +3,31 @@
 
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_dialoga" android:icon="@android:drawable/ic_menu_camera"
+        <item android:id="@+id/nav_dialoga" android:icon="@mipmap/ic_dialoga"
             android:title="Dialoga, Cidadão!" />
     </group>
     <item android:title="Câmara dos Deputados">
         <menu>
-            <item android:id="@+id/nav_deputados" android:icon="@android:drawable/ic_menu_share"
+            <item android:id="@+id/nav_deputados" android:icon="@mipmap/ic_politicos"
                 android:title="Deputados" />
-            <item android:id="@+id/nav_cotas" android:icon="@android:drawable/ic_menu_send"
+            <item android:id="@+id/nav_cotas" android:icon="@mipmap/ic_nav_gasto"
                 android:title="Cotas" />
-            <item android:id="@+id/nav_projetos_camara" android:icon="@android:drawable/ic_menu_send"
+            <item android:id="@+id/nav_projetos_camara" android:icon="@mipmap/ic_nav_projetos"
                 android:title="Projetos" />
         </menu>
     </item>
 
     <item android:title="Senado">
         <menu>
-            <item android:id="@+id/nav_senadores" android:icon="@android:drawable/ic_menu_share"
+            <item android:id="@+id/nav_senadores" android:icon="@mipmap/ic_politicos"
                 android:title="Senadores" />
-            <item android:id="@+id/nav_projetos_senado" android:icon="@android:drawable/ic_menu_send"
+            <item android:id="@+id/nav_cotas_senado" android:icon="@mipmap/ic_nav_gasto"
+                android:title="Cotas" />
+            <item android:id="@+id/nav_projetos_senado" android:icon="@mipmap/ic_nav_projetos"
                 android:title="Projetos" />
         </menu>
     </item>
-    <item android:title="Senado">
+    <item android:title="Geral">
         <menu>
             <group android:checkableBehavior="single">
                 <item android:id="@+id/nav_conf" android:icon="@android:drawable/ic_menu_manage"

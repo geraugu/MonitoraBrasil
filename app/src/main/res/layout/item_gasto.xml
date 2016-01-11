@@ -21,7 +21,8 @@
                 android:text="Combustível"
                 android:id="@+id/categoria"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
 
             <TextView
                 android:layout_width="match_parent"

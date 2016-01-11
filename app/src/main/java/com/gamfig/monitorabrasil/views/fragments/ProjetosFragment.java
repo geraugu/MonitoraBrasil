@@ -78,7 +78,7 @@ public class ProjetosFragment extends Fragment {
         //busca as informacoes do politico
         politico = actionsCreator.getPolitico(idPolitico);
         setupView(rootView);
-        actionsCreator.getAllProjetos(idPolitico,0);
+        actionsCreator.getAllProjetos(politico.getString("idCadastro"),politico.getString("tipo"),0);
 
         return rootView;
     }
@@ -120,9 +120,9 @@ public class ProjetosFragment extends Fragment {
                     }
                 }
                 if (!loading && (totalItemCount - visibleItemCount)
-                        <= (firstVisibleItem + visibleThreshold)) {
+                        <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
                     //carregar mais projetos
-                    actionsCreator.getAllProjetos(idPolitico, previousTotal);
+                    actionsCreator.getAllProjetos(politico.getString("idCadastro"),politico.getString("tipo"), previousTotal);
 
                     loading = true;
                 }

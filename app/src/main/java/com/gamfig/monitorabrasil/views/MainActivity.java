@@ -9,6 +9,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     private ActionsCreator actionsCreator;
     private DialogaStore dialogaStore;
     private PoliticoStore politicoStore;
+    private NestedScrollView mNestedScroll;
 
     private ProgressBar pbDialoga;
 
@@ -162,6 +164,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupView() {
+
+        mNestedScroll = (NestedScrollView)findViewById(R.id.nested);
         pbDialoga = (ProgressBar) findViewById(R.id.pbDialoga);
         viewCardComparaGasto = (View) findViewById(R.id.llCardComparaGastos);
     }
@@ -185,8 +189,25 @@ public class MainActivity extends AppCompatActivity
 
     private void updateCardComparacao() {
         Comparacao comparacao = politicoStore.getGasto();
-        ParseObject politico = actionsCreator.getPolitico(comparacao.getCota().getParseObject("politico").getObjectId());
-        new Card().montaCardComparacaoGasto(viewCardComparaGasto,politico,comparacao);
+        final ParseObject politico =  comparacao.getCota().getParseObject("politico");
+
+        try {
+            politico.fetchFromLocalDatastore();
+            new Card().montaCardComparacaoGasto(viewCardComparaGasto,politico,comparacao);
+            viewCardComparaGasto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
+                    intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
+                    startActivity(intent);
+                }
+            });
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        mNestedScroll.scrollTo(0, 0);
+
     }
     /**
      * Atualiza a UI depois de uma action
@@ -318,22 +339,34 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_deputados) {
             Intent intent = new Intent(this,ParlamentarListActivity.class);
-            intent.putExtra("tipo","c");
+            intent.putExtra("casa","c");
+            intent.putExtra("ordem","nome");
             startActivity(intent);
 
         } else if (id == R.id.nav_projetos_camara) {
             Intent intent = new Intent(this,ProjetoListActivity.class);
+            intent.putExtra("casa","c");
             startActivity(intent);
 
         } else if (id == R.id.nav_cotas) {
             Intent intent = new Intent(this,ParlamentarListActivity.class);
-            intent.putExtra("parlamentar","deputado");
-            intent.putExtra("tipo","rank_cota");//para mostrar o ranking de quem gasta mais
+            intent.putExtra("casa","c");
+            intent.putExtra("ordem","gastos");
             startActivity(intent);
 
         } else if (id == R.id.nav_senadores) {
             Intent intent = new Intent(this,ParlamentarListActivity.class);
-            intent.putExtra("tipo","s");
+            intent.putExtra("casa","s");
+            intent.putExtra("ordem","nome");
+            startActivity(intent);
+        }else if (id == R.id.nav_projetos_senado) {
+            Intent intent = new Intent(this,ProjetoListActivity.class);
+            intent.putExtra("casa","s");
+            startActivity(intent);
+        }else if (id == R.id.nav_cotas_senado) {
+            Intent intent = new Intent(this,ParlamentarListActivity.class);
+            intent.putExtra("casa","s");
+            intent.putExtra("ordem","gastos");
             startActivity(intent);
         }
 

@@ -132,8 +132,10 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
 
         //TWITTER
         if(null != politico.getString("twitter")) {
-            TwitterFragment fragmentTwitter = TwitterFragment.newInstance(politico.getString("twitter"), null);
-            adapter.addFrag(fragmentTwitter, "Twitter");
+            if(politico.getString("twitter").length() > 0) {
+                TwitterFragment fragmentTwitter = TwitterFragment.newInstance(politico.getString("twitter"), null);
+                adapter.addFrag(fragmentTwitter, "Twitter");
+            }
         }
 
         //PROJETOS

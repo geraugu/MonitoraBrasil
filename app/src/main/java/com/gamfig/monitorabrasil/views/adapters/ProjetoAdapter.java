@@ -71,7 +71,8 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         //verifica se ja votou
         ParseQuery<ParseObject> query = ParseQuery.getQuery("VotoProposicao");
         query.fromLocalDatastore();
-        query.whereEqualTo("id_proposicao", projeto.getNumber("id_proposicao"));
+        //query.whereEqualTo("id_proposicao", projeto.getNumber("id_proposicao"));
+        query.whereEqualTo("projeto", projeto);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
@@ -93,6 +94,7 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         });
 
         viewHolder.numero.setText(projeto.getString("tx_nome"));
+       // viewHolder.autor.setText(projeto.getParseObject(""));
 
         if(projeto.get("dt_apresentacao")!= null)
             viewHolder.data.setText(projeto.get("dt_apresentacao").toString());
@@ -255,7 +257,6 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         // each data item is just a string in this case
         public ParseObject projetoVotado;
-        public TextView classificacao;
         public TextView data;
         public TextView autor;
         public TextView descricao;
@@ -270,7 +271,6 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
 
         public ViewHolder(View v) {
             super(v);
-            classificacao = (TextView) v.findViewById(R.id.classificacao);
             data = (TextView) v.findViewById(R.id.data);
             autor = (TextView) v.findViewById(R.id.autor);
             numApoio = (TextView) v.findViewById(R.id.txtNumApoio);
@@ -279,7 +279,7 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
             btnConcordo = (Button) v.findViewById(R.id.btnConcordo);
             btnDiscordo = (Button) v.findViewById(R.id.btnDiscordo);
             btnComentar = (Button) v.findViewById(R.id.btnComentar);
-            numero = (TextView) v.findViewById(R.id.numero);
+            numero = (TextView) v.findViewById(R.id.txtTitulo);
 
             itemView.setOnClickListener(this);
         }

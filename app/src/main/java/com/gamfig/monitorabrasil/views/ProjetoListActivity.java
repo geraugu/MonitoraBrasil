@@ -60,6 +60,8 @@ public class ProjetoListActivity extends AppCompatActivity
     private RecyclerView mRecyclerView;
     private ProjetoAdapter mAdapter;
 
+    private String casa;
+
 
     private boolean realizouBusca;
     private int previousTotal = 0;
@@ -87,13 +89,22 @@ public class ProjetoListActivity extends AppCompatActivity
         // Show the Up button in the action bar.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-
+        initDependencies();
+        if(getIntent().getExtras() != null){
+            //casa (camara ou senado)
+            if(getIntent().getExtras().getString("casa") != null) {
+                casa = getIntent().getExtras().getString("casa");
+                actionsCreator.salvaParametroConfiguracao("casa",casa);
+            }
+        }else {
+            casa = actionsCreator.getItemConfiguracao("casa");
+        }
         Answers.getInstance().logContentView(new ContentViewEvent()
                 .putContentName("Lista Projetos")
-                .putContentType("todos projetos"));
+                .putContentType("todos projetos")
+                .putContentId(casa));
 
-        initDependencies();
+
 
 
         setupView();
@@ -111,9 +122,8 @@ public class ProjetoListActivity extends AppCompatActivity
                     .setActivateOnItemClick(true);
         }
 
-        actionsCreator.getAllProjetos(null,0);
+        actionsCreator.getAllProjetos(null,casa, 0);
 
-        // TODO: If exposing deep links into your app, handle intents here.
     }
 
 
@@ -133,12 +143,37 @@ public class ProjetoListActivity extends AppCompatActivity
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
-        LinearLayoutManager llm = new LinearLayoutManager(this);
+        final LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(llm);
         mAdapter = new ProjetoAdapter(actionsCreator);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setRecyclerViewOnClickListenerHack(this);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                visibleItemCount = mRecyclerView.getChildCount();
+                totalItemCount = llm.getItemCount();
+                firstVisibleItem = llm.findFirstVisibleItemPosition();
+
+                if (loading) {
+                    if (totalItemCount > previousTotal) {
+                        loading = false;
+                        previousTotal = totalItemCount;
+                    }
+                }
+                if (!loading && (totalItemCount - visibleItemCount)
+                        <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
+                    //carregar mais projetos
+                    actionsCreator.getAllProjetos(null,casa, previousTotal);
+
+                    loading = true;
+                }
+            }
+        });
 
         if(mTwoPane){
             //viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -155,17 +190,18 @@ public class ProjetoListActivity extends AppCompatActivity
         int id = item.getItemId();
         if(id == R.id.action_filter){
             //abrir o dialog para filtrar
-            DialogFiltro avaliacao = new DialogFiltro("Escolha os filtros");
-            avaliacao.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            DialogFiltro filtro = new DialogFiltro("Escolha os filtros");
+            filtro.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
                     //realizar a busca por uf do autor, partido, ano ou casa
                     projetoStore.limpaProjetos();
-                    actionsCreator.getAllProjetos(null, 0);
+                    actionsCreator.getAllProjetos(null,casa, 0);
 
 
                 }
             });
+            filtro.show(getSupportFragmentManager(), "dialogFiltro");
         }
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
@@ -264,8 +300,8 @@ public class ProjetoListActivity extends AppCompatActivity
                 public boolean onQueryTextSubmit(String query) {
                     if (!query.isEmpty()) {
                         //realizar a busca
-                        actionsCreator.buscaProjetoPorPalavra(query);
-
+                        projetoStore.limpaProjetos();
+                        actionsCreator.buscaProjetoPorPalavra(query,casa);
                         realizouBusca = true;
                     }
 
@@ -276,7 +312,7 @@ public class ProjetoListActivity extends AppCompatActivity
                 public boolean onQueryTextChange(String newText) {
                     if(realizouBusca && newText.isEmpty()){
                         projetoStore.limpaProjetos();
-                        actionsCreator.getAllProjetos(null, 0);
+                        actionsCreator.getAllProjetos(null,casa, 0);
                         realizouBusca = false;
                     }
                     return false;

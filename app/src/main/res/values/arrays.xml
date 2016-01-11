@@ -2,6 +2,7 @@
 <resources>
 
     <string-array name="todasufs">
+        <item>Selecione uma UF</item>
         <item>AC</item>
         <item>AL</item>
         <item>AM</item>

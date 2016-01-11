@@ -154,8 +154,10 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
 
     private void updateUI() {
         List<ParseObject> gastos = politicoStore.getGastos();
-        mAdapter.setItems(gastos);
-        setData(gastos);
+        if(gastos != null) {
+            mAdapter.setItems(gastos);
+            setData(gastos);
+        }
 //       Offset(0f);
     }
 

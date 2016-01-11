@@ -30,8 +30,10 @@ public class Card {
         nomePolitico.setText(politico.getString("nome"));
         categoria.setText(comparacao.getCota().getString("categoria"));
 
-        total.setText("R$ "+new MyValueFormatter().formata(comparacao.getCota().getNumber("total").floatValue()));
-        txtComparacao.setText(String.valueOf(comparacao.getValor())+" "+comparacao.getProduto());
+        MyValueFormatter formatter = new MyValueFormatter();
+        total.setText("R$ "+formatter.formata(comparacao.getCota().getNumber("total").floatValue()));
+        formatter.setMaximoDigitos(0);
+        txtComparacao.setText(formatter.formata(comparacao.getValor())+" "+comparacao.getProduto());
         Imagens.getFotoPolitico(politico,foto);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {

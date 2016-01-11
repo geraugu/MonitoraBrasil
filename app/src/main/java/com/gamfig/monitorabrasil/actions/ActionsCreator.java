@@ -636,10 +636,15 @@ public class ActionsCreator {
      * Busca os politicos de uma casa especifica
      * @param casa camara ou senado
      */
-    public void getAllPoliticos(String casa) {
-
+    public void getAllPoliticos(String casa, String ordem) {
+        //se tipo
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Politico");
         query.whereEqualTo("tipo",casa);
+        if(ordem.equals("nome"))
+            query.addAscendingOrder("nome");
+        else{
+            query.addDescendingOrder(ordem);
+        }
         query.setLimit(1000);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -664,9 +669,9 @@ public class ActionsCreator {
         });
     }
 
-    public void getPresenca(String idMatricula) {
+    public void getPresenca(ParseObject politico) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Presenca");
-        query.whereEqualTo("id_matricula",idMatricula);
+        query.whereEqualTo("politico",politico);
         query.addDescendingOrder("nr_ano");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -921,13 +926,14 @@ public class ActionsCreator {
     }
 
     /**
-     * Busca os projetos de um politico
+     * Busca os projetos de um politico ou todos se o idPolitico = null
      *
      * @param idPolitico
      * @param previousTotal
      */
-    public void getAllProjetos(String idPolitico, int previousTotal) {
+    public void getAllProjetos(String idPolitico, String casa, int previousTotal) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Proposicao");
+        query.whereEqualTo("tp_casa",casa);
         query.addDescendingOrder("nr_ano");
         query.addDescendingOrder("tx_nome");
         query.setLimit(15);
@@ -963,11 +969,13 @@ public class ActionsCreator {
      * Pesquisa de projetos
      *
      * @param chave pesquisa
+     * @param casa
      */
-    public void buscaProjetoPorPalavra(String chave) {
+    public void buscaProjetoPorPalavra(String chave, String casa) {
         chave =  "(?i).*"+chave+".*";
         ParseQuery<ParseObject> query1 = ParseQuery.getQuery("Proposicao");
         query1.whereMatches("txt_ementa",chave);
+        query1.whereEqualTo("casa",casa);
 
         ParseQuery<ParseObject> query2 = ParseQuery.getQuery("Proposicao");
         query2.whereMatches("txt_nome", chave);
@@ -1019,5 +1027,34 @@ public class ActionsCreator {
             e.printStackTrace();
         }
        return null;
+    }
+
+    /**
+     * Salva o parametro em configuracao
+     *
+     * @param parametro nome do parametro
+     * @param valor valor do parametro
+     */
+    public void salvaParametroConfiguracao(String parametro, String valor) {
+        ParseObject conf = getConfiguracao();
+        if(conf == null)
+            conf = new ParseObject("Configuracao");
+        conf.put(parametro,valor);
+        try {
+            conf.pin();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getItemConfiguracao(String item) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Configuracao");
+        query.fromLocalDatastore();
+        try {
+            return query.getFirst().getString(item);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

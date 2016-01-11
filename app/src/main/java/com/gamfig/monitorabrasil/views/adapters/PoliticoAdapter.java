@@ -58,9 +58,15 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         politico.pinInBackground();
         viewHolder.mTextView.setText(politico.get("nome").toString());
         viewHolder.txtPartido.setText(politico.get("siglaPartido").toString()+"-"+politico.getString("uf"));
-
+        if(politico.getNumber("faltas")!=null)
+            viewHolder.txtFaltas.setText("Faltas: "+politico.getNumber("faltas").toString());
+        else
+            viewHolder.txtFaltas.setVisibility(View.GONE);
         if(politico.getString("twitter")!= null)
-            viewHolder.txtTwitter.setText(politico.getString("twitter"));
+            if(politico.getString("twitter").length() > 0)
+                viewHolder.txtTwitter.setText(politico.getString("twitter"));
+        else
+            viewHolder.txtTwitter.setVisibility(View.GONE);
 
         if(politico.getNumber("gastos")==null)
             viewHolder.txtGastos.setText("Gasto: não disponível");
@@ -91,12 +97,14 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         public TextView txtPartido;
         public TextView txtGastos;
         public TextView txtTwitter;
+        public TextView txtFaltas;
         public ImageView foto;
         public RatingBar rb;
         public ViewHolder(View v) {
             super(v);
             mTextView = (TextView) v.findViewById(R.id.txtNome);
             txtTwitter = (TextView) v.findViewById(R.id.txtTwitter);
+            txtFaltas = (TextView) v.findViewById(R.id.txtFaltas);
             txtPartido = (TextView) v.findViewById(R.id.txtPartido);
             txtGastos = (TextView) v.findViewById(R.id.txtGastos);
             foto  = (ImageView)v.findViewById(R.id.foto);

@@ -69,8 +69,8 @@ public class Grafico {
         ArrayList<Integer> colors = new ArrayList<Integer>();
 
 
-        for (int c : ColorTemplate.VORDIPLOM_COLORS)
-            colors.add(c);
+       // for (int c : ColorTemplate.VORDIPLOM_COLORS)
+         //   colors.add(c);
 
 
         for (int c : ColorTemplate.JOYFUL_COLORS)
@@ -85,8 +85,8 @@ public class Grafico {
             colors.add(c);
 
 
-        //  for (int c : ColorTemplate.PASTEL_COLORS)
-        //      colors.add(c);
+          for (int c : ColorTemplate.PASTEL_COLORS)
+              colors.add(c);
 
 
         colors.add(ColorTemplate.getHoloBlue());
