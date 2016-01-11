@@ -15,6 +15,15 @@
             android:id="@+id/ratingBar2"
             android:layout_gravity="center_horizontal" />
 
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Avalie"
+            style="@style/botao"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/btnAvalie" />
+
         <android.support.v7.widget.CardView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

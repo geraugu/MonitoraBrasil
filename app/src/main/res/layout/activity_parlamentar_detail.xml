@@ -66,13 +66,25 @@
     <!--<include layout="@layout/nested_scrollview"/>-->
 
 
-    <!--<android.support.design.widget.FloatingActionButton
+    <android.support.design.widget.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        app:layout_anchor="@id/viewpager"
+        app:layout_anchorGravity="bottom|right|end"
+        android:src="@android:drawable/stat_notify_chat"
+        android:layout_margin="@dimen/fab_margin"
+        android:id="@+id/fabComentario"
+        android:clickable="true"/>
+
+    <android.support.design.widget.FloatingActionButton
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         app:layout_anchor="@id/appbar"
         app:layout_anchorGravity="bottom|right|end"
-        android:src="@drawable/ic_discuss"
+        android:paddingLeft="20dp"
+        android:src="@android:drawable/star_big_off"
         android:layout_margin="@dimen/fab_margin"
-        android:clickable="true"/>-->
+        android:id="@+id/fabMonitorar"
+        android:clickable="true"/>
 
 </android.support.design.widget.CoordinatorLayout>

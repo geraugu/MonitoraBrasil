@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -135,8 +136,9 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         //monta ficha
         montaFicha(rootView);
 
+        Button btnAvalie = (Button) rootView.findViewById(R.id.btnAvalie);
         //btnAvaliar
-        mRatingBar.setOnClickListener(new View.OnClickListener() {
+        btnAvalie.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 if (ParseUser.getCurrentUser() != null) {

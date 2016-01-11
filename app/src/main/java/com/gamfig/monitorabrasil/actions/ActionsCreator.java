@@ -62,10 +62,10 @@ public class ActionsCreator {
 
     /**
      * Actions do usuario - cadastrar
-     * @param nome
-     * @param password
-     * @param email
-     * @param mParseFile
+     * @param nome nome
+     * @param password senha
+     * @param email email
+     * @param mParseFile foto
      */
     public void cadastrar(final String nome, final String password, final String email, final ParseFile mParseFile) {
 
@@ -139,13 +139,7 @@ public class ActionsCreator {
 
     public void getAllComentarios(String tipo, String idObject){
         ParseQuery<ParseObject> query = ParseQuery.getQuery(tipo);
-        if(tipo.equals("Comentario")){
-            ParseObject projeto = ParseObject.createWithoutData("Projeto", idObject);
-            query.whereEqualTo("projeto", projeto);
-        }else{
-            ParseObject politico = ParseObject.createWithoutData("Politico",idObject);
-            query.whereEqualTo("politico", politico);
-        }
+        query.whereEqualTo("id_projeto", idObject);
         query.include("user");
 
         query.addDescendingOrder("createdAt");
@@ -170,16 +164,17 @@ public class ActionsCreator {
         if(user!= null){
             ParseObject comentario =new ParseObject(tipo);
             ParseObject object;
-            if(!tipo.equals("Comentario")){
+            if(!tipo.equals("ComentarioProjeto")){
                 //busca politico
                 object = ParseObject.createWithoutData("Politico", idObject);
 
                 comentario.put("politico",object);
             }else{
-                object = ParseObject.createWithoutData("Projeto", idObject);
+                object = ParseObject.createWithoutData("id_projeto", idObject);
                 comentario.put("projeto",object);
             }
-            comentario.put("mensagem",mensagem);
+            comentario.put("id_projeto",idObject);
+            comentario.put("tx_comentario",mensagem);
             comentario.put("user", user);
             comentario.put("nome", user.getString("nome"));
 
@@ -760,38 +755,6 @@ public class ActionsCreator {
     }
 
     /**
-     * Salva o tipo da lista de politico na classe de configuracao
-     * @param tipo c ou s (camara ou senado)
-     */
-    public void salvaTipoPolitico(String tipo) {
-
-        ParseObject conf = getConfiguracao();
-        if(conf == null)
-            conf = new ParseObject("Configuracao");
-        conf.put("tipo",tipo);
-        try {
-            conf.pin();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * busca o tipo de politico (c ou s) em configuracao
-     * @return tipo de politico c ou s
-     */
-    public String getTipoPolitico() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Configuracao");
-        query.fromLocalDatastore();
-        try {
-            return query.getFirst().getString("tipo");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
      * busca a classe configuracao
      * @return configuracao
      */
@@ -928,8 +891,8 @@ public class ActionsCreator {
     /**
      * Busca os projetos de um politico ou todos se o idPolitico = null
      *
-     * @param idPolitico
-     * @param previousTotal
+     * @param idPolitico id
+     * @param previousTotal paginacao
      */
     public void getAllProjetos(String idPolitico, String casa, int previousTotal) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Proposicao");
@@ -1009,6 +972,10 @@ public class ActionsCreator {
         });
     }
 
+    /**
+     * Busca os partidos
+     * @return lista de partidos na nuvem
+     */
     public List<String> getPartidos() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Partido");
         query.addAscendingOrder("nome");
@@ -1026,7 +993,7 @@ public class ActionsCreator {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-       return null;
+        return null;
     }
 
     /**
@@ -1047,6 +1014,12 @@ public class ActionsCreator {
         }
     }
 
+
+    /**
+     * Busca o item configuracao
+     * @param item nome do item
+     * @return string do valor
+     */
     public String getItemConfiguracao(String item) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Configuracao");
         query.fromLocalDatastore();
@@ -1056,5 +1029,63 @@ public class ActionsCreator {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Salva o monitoramento do usuario e politico
+     * @param politico passa o objeto politico
+     * @param monitora o valor se esta ou nao monitorando
+     * @throws ParseException
+     */
+    public void salvaUsuarioPolitico(ParseObject politico, boolean monitora) throws ParseException {
+        if(monitora){
+            ParseObject usuarioPolitico = new ParseObject("UsuarioPolitico");
+            usuarioPolitico.put("politico",politico);
+            usuarioPolitico.put("user",ParseUser.getCurrentUser());
+            usuarioPolitico.saveInBackground();
+            try {
+                usuarioPolitico.pin();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }else{
+            //busca o monitoramento e exclui
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("UsuarioPolitico");
+            query.whereEqualTo("politico",politico);
+            query.whereEqualTo("user",ParseUser.getCurrentUser());
+            query.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if(e == null)
+                        object.deleteInBackground();
+                    try {
+                        object.unpin();
+                    } catch (ParseException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            });
+
+        }
+    }
+
+    /**
+     * Verifica se o usuario esta monitorando o politico
+     * @param politico objeto politico
+     * @return se esta ou nao
+     */
+    public boolean estaMonitorando(ParseObject politico){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("UsuarioPolitico");
+        query.fromLocalDatastore();
+        query.whereEqualTo("politico",politico);
+        query.whereEqualTo("user",ParseUser.getCurrentUser());
+        try {
+            if(query.getFirst() != null){
+                return true;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

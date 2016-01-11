@@ -146,7 +146,7 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
             @Override
             public void onClick(View v) {
                 Intent mIntent =new Intent(AppController.getInstance().getApplicationContext(), ComentarioActivity.class);
-                mIntent.putExtra("projeto",viewHolder.projeto.getObjectId());
+                mIntent.putExtra("projeto",viewHolder.projeto.getString("id_proposicao"));
 
                 mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 

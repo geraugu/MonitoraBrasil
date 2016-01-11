@@ -2,6 +2,8 @@ package com.gamfig.monitorabrasil.views;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,17 +13,20 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
+import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.fragments.FichaFragment;
 import com.gamfig.monitorabrasil.views.fragments.GastosFragment;
 import com.gamfig.monitorabrasil.views.fragments.ProjetosFragment;
 import com.gamfig.monitorabrasil.views.fragments.TwitterFragment;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.squareup.otto.Bus;
 
@@ -78,14 +83,46 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.detail_tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
+        final FloatingActionButton fabComentario = (FloatingActionButton) findViewById(R.id.fabComentario);
+        fabComentario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mIntent =new Intent(AppController.getInstance().getApplicationContext(), ComentarioActivity.class);
+                mIntent.putExtra(ID_POLITICO,politico.getString("idCadastro"));
+                mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                AppController.getInstance().startActivity(mIntent);
+            }
+        });
+
+        final boolean estaMonitorando = actionsCreator.estaMonitorando(politico);
+        final FloatingActionButton fabMonitorar = (FloatingActionButton) findViewById(R.id.fabMonitorar);
+        fabMonitorar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(estaMonitorando){
+                    fabMonitorar.setBackgroundResource(android.R.drawable.star_big_off);
+                    Snackbar.make(view, "Agora vc está monitorando", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }else{
+                    fabMonitorar.setBackgroundResource(android.R.drawable.star_big_on);
+                    Snackbar.make(view, "Retirado de sua lista de monitoramento", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+                try {
+                    actionsCreator.salvaUsuarioPolitico(politico,true);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        if(estaMonitorando){
+            fabMonitorar.setBackgroundResource(android.R.drawable.star_big_on);
+        }else{
+            fabMonitorar.setBackgroundResource(android.R.drawable.star_big_off);
+        }
+
 
         // Show the Up button in the action bar.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
