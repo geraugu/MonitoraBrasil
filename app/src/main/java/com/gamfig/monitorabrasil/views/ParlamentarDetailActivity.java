@@ -88,7 +88,7 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent mIntent =new Intent(AppController.getInstance().getApplicationContext(), ComentarioActivity.class);
-                mIntent.putExtra(ID_POLITICO,politico.getString("idCadastro"));
+                mIntent.putExtra(ID_POLITICO,politico.getObjectId());
                 mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 AppController.getInstance().startActivity(mIntent);
             }

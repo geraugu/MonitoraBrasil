@@ -139,9 +139,15 @@ public class ActionsCreator {
 
     public void getAllComentarios(String tipo, String idObject){
         ParseQuery<ParseObject> query = ParseQuery.getQuery(tipo);
-        query.whereEqualTo("id_projeto", idObject);
+        if(!tipo.equals("ComentarioProjeto")){
+            ParseObject projeto = ParseObject.createWithoutData("Proposicao", idObject);
+            query.whereEqualTo("proposicao", projeto);
+        }else{
+            ParseObject politico = ParseObject.createWithoutData("Politico", idObject);
+            query.whereEqualTo("politico", politico);
+        }
         query.include("user");
-
+        query.include("usuario");
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -170,10 +176,9 @@ public class ActionsCreator {
 
                 comentario.put("politico",object);
             }else{
-                object = ParseObject.createWithoutData("id_projeto", idObject);
-                comentario.put("projeto",object);
+                object = ParseObject.createWithoutData("Proposicao", idObject);
+                comentario.put("proposicao",object);
             }
-            comentario.put("id_projeto",idObject);
             comentario.put("tx_comentario",mensagem);
             comentario.put("user", user);
             comentario.put("nome", user.getString("nome"));
