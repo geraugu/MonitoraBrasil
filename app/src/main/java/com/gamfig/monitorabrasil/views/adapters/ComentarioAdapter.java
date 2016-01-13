@@ -59,7 +59,7 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
         ParseObject comentario = mDataset.get(i);
 
         viewHolder.txtUser.setText(comentario.get("nome").toString());
-        viewHolder.txtComentario.setText(comentario.get("mensagem").toString());
+        viewHolder.txtComentario.setText(comentario.get("tx_comentario").toString());
 
         //calcula o horario da mensagem
         Date data = comentario.getCreatedAt();

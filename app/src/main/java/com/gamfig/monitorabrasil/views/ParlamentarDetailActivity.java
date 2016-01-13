@@ -62,10 +62,16 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         initDependencies();
 
-        //busca o politico
-        politico = politicoStore.getPolitico(getIntent().getExtras().getString(ID_POLITICO));
+        //busca o politico'
+        politico = ParseObject.createWithoutData("Politico",getIntent().getExtras().getString(ID_POLITICO));
+        try {
+            politico.fetchFromLocalDatastore();
+            setTitle(politico.getString( "nome"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
-        setTitle(politico.getString( "nome"));
+
 
         Answers.getInstance().logContentView(new ContentViewEvent()
                 .putContentName("Ficha")

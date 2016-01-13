@@ -49,7 +49,7 @@ public class ComentarioActivity extends AppCompatActivity {
 
         pb.setVisibility(View.VISIBLE);
 
-        if (getIntent().getStringExtra("projeto")== null){
+        if (getIntent().getStringExtra("projeto")!= null){
             idObjeto = getIntent().getStringExtra("projeto");
             tipo="ComentarioProjeto";
 

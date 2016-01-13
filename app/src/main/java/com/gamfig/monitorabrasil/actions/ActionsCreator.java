@@ -139,7 +139,7 @@ public class ActionsCreator {
 
     public void getAllComentarios(String tipo, String idObject){
         ParseQuery<ParseObject> query = ParseQuery.getQuery(tipo);
-        if(!tipo.equals("ComentarioProjeto")){
+        if(tipo.equals("ComentarioProjeto")){
             ParseObject projeto = ParseObject.createWithoutData("Proposicao", idObject);
             query.whereEqualTo("proposicao", projeto);
         }else{
