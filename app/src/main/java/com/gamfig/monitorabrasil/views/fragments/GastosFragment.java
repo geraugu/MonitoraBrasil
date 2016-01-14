@@ -18,6 +18,7 @@ import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Grafico;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.adapters.GastoAdapter;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -46,6 +47,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     private GastoAdapter mAdapter;
 
     private PieChart mChart;
+    private HorizontalBarChart mHorizontalChart;
     private Typeface tf;
     private Grafico grafico;
 
@@ -126,6 +128,9 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
         // add a selection listener
         mChart.setOnChartValueSelectedListener(this);
 
+        mHorizontalChart = (HorizontalBarChart) rootView.findViewById(R.id.chart2);
+        mHorizontalChart = grafico.setupHorizontalChartGastos(mHorizontalChart);
+
 
     }
 
@@ -159,6 +164,16 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
             setData(gastos);
         }
 //       Offset(0f);
+    }
+
+    private void updateHorizontalGraph(){
+        List<ParseObject> gastos = politicoStore.getGastos();
+        if(gastos != null) {
+            mHorizontalChart.setData(grafico.horizontalBarDataGastos(gastos));
+            // undo all highlights
+            mHorizontalChart.animateY(2500);
+            mHorizontalChart.invalidate();
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
@@ -23,6 +23,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
@@ -34,6 +36,7 @@ import com.gamfig.monitorabrasil.model.Pergunta;
 import com.gamfig.monitorabrasil.model.Tema;
 import com.gamfig.monitorabrasil.stores.DialogaStore;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
+import com.gamfig.monitorabrasil.views.dialogs.DialogGostou;
 import com.gamfig.monitorabrasil.views.util.Card;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
@@ -72,14 +75,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -94,6 +90,20 @@ public class MainActivity extends AppCompatActivity
         navigationView.addHeaderView(headerView);
         initDependencies();
         setupView();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabComentario);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Answers.getInstance().logCustom(new CustomEvent("Comentario")
+                        .putCustomAttribute("tela", "MainActivity"));
+
+                Intent mIntent =new Intent(AppController.getInstance().getApplicationContext(), ComentarioActivity.class);
+                mIntent.putExtra("tipo","principal");
+                mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                AppController.getInstance().startActivity(mIntent);
+            }
+        });
 
 
         headerView.setOnClickListener(new View.OnClickListener() {
@@ -197,6 +207,9 @@ public class MainActivity extends AppCompatActivity
             viewCardComparaGasto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Answers.getInstance().logCustom(new CustomEvent("TouchCardGasto")
+                            .putCustomAttribute("Politico", politico.getString("nome")));
+
                     Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
                     intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
                     startActivity(intent);
@@ -289,6 +302,10 @@ public class MainActivity extends AppCompatActivity
                 }
                 intent.putExtra("perguntaId", mPergunta.getObjectId());
                 intent.putExtra("temaId", ((ParseObject) mPergunta.get("tema")).getObjectId());
+
+                Answers.getInstance().logCustom(new CustomEvent("TouchCardDialoga")
+                        .putCustomAttribute("Digaloga", mPergunta.getObjectId()));
+
                 startActivity(intent);
             }
         });
@@ -320,7 +337,12 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_share) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.msg_compartilhe));
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
             return true;
         }
 
@@ -368,7 +390,20 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra("casa","s");
             intent.putExtra("ordem","gastos");
             startActivity(intent);
+        }else if (id == R.id.nav_gostou) {
+            DialogFragment dialog = new DialogGostou();
+            dialog.show(getSupportFragmentManager(), "dialog");
+        }else if (id == R.id.nav_sobre) {
+            Intent intent = new Intent(this,SobreActivity.class);
+            startActivity(intent);
+        }else if (id == R.id.nav_share) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.msg_compartilhe));
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
         }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

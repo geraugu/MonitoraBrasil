@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.gamfig.monitorabrasil.application.AppConfig;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.parse.ParseObject;
 
@@ -29,6 +30,10 @@ public class Imagens {
 			AppController.getInstance().getmImagemLoader().displayImage(AppController.URL_FOTO_SENADOR + politico.get("idCadastro") + ".jpg", img);
 
     }
+
+	public static void getImagemPartido(String partido, ImageView img){
+		AppController.getInstance().getmImagemLoader().displayImage(AppConfig.URL_IMAGEM_PARTIDOS + partido + ".gif", img);
+	}
 
     public static  void carregaImagemFacebook(String idFacebook,ImageView img,String tamanho){
         String url="http://graph.facebook.com/"+idFacebook+"/picture?type="+tamanho;

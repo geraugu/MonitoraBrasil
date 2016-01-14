@@ -4,8 +4,14 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -33,6 +39,78 @@ public class Grafico {
 
     public Grafico(){}
     public Grafico(Typeface tf){this.tf=tf;}
+
+    public HorizontalBarChart setupHorizontalChartGastos(HorizontalBarChart mChart){
+        mChart.setDrawBarShadow(false);
+
+        mChart.setDrawValueAboveBar(true);
+
+        mChart.setDescription("");
+
+        // if more than 60 entries are displayed in the chart, no values will be
+        // drawn
+        mChart.setMaxVisibleValueCount(60);
+
+        // scaling can now only be done on x- and y-axis separately
+        mChart.setPinchZoom(false);
+
+        // draw shadows for each bar that show the maximum value
+        // mChart.setDrawBarShadow(true);
+
+        // mChart.setDrawXLabels(false);
+
+        mChart.setDrawGridBackground(false);
+
+        // mChart.setDrawYLabels(false);
+
+
+        XAxis xl = mChart.getXAxis();
+        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xl.setTypeface(tf);
+        xl.setDrawAxisLine(true);
+        xl.setDrawGridLines(true);
+        xl.setGridLineWidth(0.3f);
+
+        YAxis yl = mChart.getAxisLeft();
+        yl.setTypeface(tf);
+        yl.setDrawAxisLine(true);
+        yl.setDrawGridLines(true);
+        yl.setGridLineWidth(0.3f);
+//        yl.setInverted(true);
+
+        YAxis yr = mChart.getAxisRight();
+        yr.setTypeface(tf);
+        yr.setDrawAxisLine(true);
+        yr.setDrawGridLines(false);
+//        yr.setInverted(true);
+        Legend l = mChart.getLegend();
+        l.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
+        l.setFormSize(8f);
+        l.setXEntrySpace(4f);
+
+        return mChart;
+    }
+
+    public BarData horizontalBarDataGastos(List<ParseObject> gastos){
+
+        //mChart.animateY(2500);
+        ArrayList<BarEntry> yVals1 = new ArrayList<BarEntry>();
+        ArrayList<String> xVals = new ArrayList<String>();
+
+        for (int i = 0; i < gastos.size(); i++) {
+            xVals.add(gastos.get(i).getNumber("mes").toString());
+            yVals1.add(new BarEntry(gastos.get(i).getNumber("mes").floatValue(), i));
+        }
+
+        BarDataSet set1 = new BarDataSet(yVals1, "Gastos");
+
+
+
+        BarData data = new BarData(xVals, set1);
+        data.setValueTextSize(10f);
+        data.setValueTypeface(tf);
+        return data;
+    }
 
     /**
      * Busca o dataset para colocar no grafico PIE

@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
@@ -129,6 +131,9 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
             DialogaListaPerguntasFragment frag = DialogaListaPerguntasFragment.newInstance(
                     tema.getString("Nome"),tema.getString("imagem"),
                     Tema.buscaCor(tema.getString("imagem")),tema.getObjectId());
+
+            Answers.getInstance().logCustom(new CustomEvent("TouchTema")
+                    .putCustomAttribute("tema", tema.getString("Nome")));
 
             FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.fragment, frag, "dialogaListaPerguntas");

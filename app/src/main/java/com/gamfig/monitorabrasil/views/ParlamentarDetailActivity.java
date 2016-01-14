@@ -17,6 +17,7 @@ import android.view.View;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.application.AppController;
@@ -93,6 +94,11 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         fabComentario.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Answers.getInstance().logCustom(new CustomEvent("Comentario")
+                        .putCustomAttribute("tela", "Politico Detalhe")
+                        .putCustomAttribute("politico", politico.getString("nome")));
+
                 Intent mIntent =new Intent(AppController.getInstance().getApplicationContext(), ComentarioActivity.class);
                 mIntent.putExtra(ID_POLITICO,politico.getObjectId());
                 mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -105,6 +111,11 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         fabMonitorar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Answers.getInstance().logCustom(new CustomEvent("TouchMonitorar")
+                        .putCustomAttribute("acao", String.valueOf(estaMonitorando))
+                        .putCustomAttribute("politico", politico.getString("nome")));
+
                 if(estaMonitorando){
                     fabMonitorar.setBackgroundResource(android.R.drawable.star_big_off);
                     Snackbar.make(view, "Agora vc está monitorando", Snackbar.LENGTH_LONG)

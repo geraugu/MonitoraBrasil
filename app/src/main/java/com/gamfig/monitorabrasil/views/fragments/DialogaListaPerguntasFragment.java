@@ -21,6 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
@@ -244,6 +246,8 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
     public void onClickListener(View view, int position) {
         ParseObject pergunta = dialogaStore.getPerguntas().get(position);
 
+        Answers.getInstance().logCustom(new CustomEvent("TouchPergunta")
+                .putCustomAttribute("pergunta", pergunta.getObjectId()));
 
         DialogaVotoFragment frag = DialogaVotoFragment.newInstance(
                 nome,icone,cor,idTema,pergunta.getObjectId());

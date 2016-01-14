@@ -31,4 +31,11 @@
         <item>SP</item>
         <item>TO</item>
     </string-array>
+
+    <string-array name="gostou_array">
+        <item>Curta no Facebook</item>
+        <item>Siga no Twitter</item>
+        <item>Avalie 5 estrelas!</item>
+        <item>Acesse o site</item>
+    </string-array>
 </resources>

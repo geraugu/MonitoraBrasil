@@ -30,8 +30,10 @@
     <item android:title="Geral">
         <menu>
             <group android:checkableBehavior="single">
-                <item android:id="@+id/nav_conf" android:icon="@android:drawable/ic_menu_manage"
-                    android:title="Configuração" />
+                <item android:id="@+id/nav_share" android:icon="@android:drawable/ic_menu_share"
+                    android:title="Compartilhar" />
+                <item android:id="@+id/nav_gostou" android:icon="@mipmap/ic_action_like_gray"
+                    android:title="Gostou?" />
                 <item android:id="@+id/nav_sobre" android:icon="@android:drawable/ic_menu_manage"
                     android:title="Sobre" />
             </group>

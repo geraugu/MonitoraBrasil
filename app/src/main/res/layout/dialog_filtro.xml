@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="400dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
     android:orientation="vertical"
@@ -15,46 +15,67 @@
         android:textSize="20dp"
         android:layout_marginTop="16dp" />
     <Spinner
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/spnUf"
-        android:layout_alignBaseline="@+id/lblUf"
-        android:layout_toRightOf="@+id/lblPartido"
         android:spinnerMode="dropdown" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/partido"
-        android:id="@+id/lblPartido"
-        android:layout_below="@id/spnUf"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:id="@+id/lblPartido" />
     <Spinner
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/spnPartido"
-        android:layout_toRightOf="@+id/lblPartido"
-        android:layout_alignBaseline="@+id/lblPartido" />
+        android:id="@+id/spnPartido" />
 
 
-<!-- CATEGORIA -->
+    <!-- CATEGORIA -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/llCategoria"
-        android:layout_below="@id/spnPartido" android:orientation="horizontal">
-    <TextView
-        android:layout_width="97dp"
-        android:layout_height="wrap_content"
-        android:text="@string/tipo"
-        android:textSize="20dp" />
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="97dp"
+            android:layout_height="wrap_content"
+            android:text="@string/categoria"
+            android:textSize="20dp" />
 
-
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spnTipoCategoria"/>
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spnCategoria"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/llAno"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="97dp"
+            android:layout_height="wrap_content"
+            android:text="@string/ano"
+            android:textSize="20dp" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spnAno" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="?android:attr/dividerHorizontal"
+        android:layout_above="@+id/linearLayout3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="fill_parent"
@@ -66,6 +87,14 @@
         android:paddingRight="2dip"
         android:paddingTop="0dip"
         android:id="@+id/linearLayout3">
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/btnLimpar"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/limpar" />
 
         <Button
             android:id="@+id/cancel"
@@ -84,14 +113,5 @@
             android:text="@android:string/ok" />
     </LinearLayout>
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
-        android:background="?android:attr/dividerHorizontal"
-        android:layout_above="@+id/linearLayout3"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
-
-
-</RelativeLayout>
+</LinearLayout>

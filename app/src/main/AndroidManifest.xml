@@ -62,7 +62,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.gamfig.monitorabrasil.views.MainActivity" />
         </activity>
-
         <activity
             android:name=".views.ParlamentarDetailActivity"
             android:label="@string/title_parlamentar_detail"
@@ -94,7 +93,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.gamfig.monitorabrasil.views.ProjetoListActivity" />
         </activity>
-
+        <activity android:name=".views.SobreActivity"></activity>
     </application>
 
 </manifest>

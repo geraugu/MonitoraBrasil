@@ -6,10 +6,20 @@
     android:paddingTop="3dp"
     android:paddingBottom="10dp">
 
-    <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:id="@+id/foto" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/foto" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imgPartido" />
+    </LinearLayout>
 
     <LinearLayout
         android:orientation="vertical"
@@ -17,30 +27,35 @@
         android:layout_height="wrap_content">
 
 
-
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Vereador XXXXXX"
-        android:id="@+id/txtNome"
-        android:textSize="16dp"
-        android:textColor="@android:color/black"
-        android:textStyle="bold"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="3dp"
-        android:maxLines="1" />
-</LinearLayout>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/txtTwitter"
-            android:layout_marginLeft="14dp"
-            android:textSize="14dp" />
+            android:text="Vereador XXXXXX"
+            android:id="@+id/txtNome"
+            android:textSize="16dp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="3dp"
+            android:maxLines="1" />
+
+        <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtTwitter"
+                android:layout_marginLeft="14dp"
+                android:textSize="14dp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView" />
+        </LinearLayout>
 
         <TextView
         android:layout_width="wrap_content"

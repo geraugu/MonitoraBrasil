@@ -4,8 +4,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
@@ -20,7 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
@@ -80,14 +78,14 @@ public class ParlamentarListActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
         // Show the Up button in the action bar.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -101,15 +99,24 @@ public class ParlamentarListActivity extends AppCompatActivity
                 actionsCreator.salvaParametroConfiguracao("casa",casa);
                 ordem = getIntent().getExtras().getString("ordem");
                 actionsCreator.salvaParametroConfiguracao("ordem",getIntent().getExtras().getString("ordem"));
+
+                //limpa o filtro
+                actionsCreator.salvaParametroConfiguracao("ufPosSelecionada","0");
+                actionsCreator.salvaParametroConfiguracao("partidoPosSelecionada","0");
+                actionsCreator.salvaParametroConfiguracao("anoPosSelecionada","0");
+                actionsCreator.salvaParametroConfiguracao("categoriaPosSelecionada","0");
+                actionsCreator.salvaParametroConfiguracao("ufSelecionada",null);
+                actionsCreator.salvaParametroConfiguracao("partidoSelecionada",null);
+                actionsCreator.salvaParametroConfiguracao("anoSelecionada",null);
+                actionsCreator.salvaParametroConfiguracao("categoriaSelecionada",null);
             }
         }else {
             casa = actionsCreator.getItemConfiguracao("casa");
             ordem = actionsCreator.getItemConfiguracao("ordem");
         }
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Lista Politicos")
-                .putContentType(casa)
-                .putContentId(ordem));
+        Answers.getInstance().logCustom(new CustomEvent("Lista Politicos")
+                .putCustomAttribute("casa", casa).putCustomAttribute("ordem", ordem));
+
 
         setupView();
         if (findViewById(R.id.parlamentar_detail_container) != null) {

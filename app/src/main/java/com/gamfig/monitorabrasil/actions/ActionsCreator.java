@@ -1,5 +1,10 @@
 package com.gamfig.monitorabrasil.actions;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
+import com.crashlytics.android.answers.LoginEvent;
+import com.crashlytics.android.answers.SignUpEvent;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Pergunta;
@@ -52,6 +57,7 @@ public class ActionsCreator {
         ParseUser.logOutInBackground(new LogOutCallback() {
             @Override
             public void done(com.parse.ParseException e) {
+                Answers.getInstance().logCustom(new CustomEvent("Logout"));
                 dispatcher.dispatch(
                         UserActions.USER_LOGOUT,
                         UserActions.KEY_TEXT, "sucesso"
@@ -82,12 +88,16 @@ public class ActionsCreator {
                     user.signUpInBackground(new SignUpCallback() {
                         @Override
                         public void done(com.parse.ParseException e) {
+
                             if (e == null) {
+                                Answers.getInstance().logSignUp(new SignUpEvent().putSuccess(true));
                                 dispatcher.dispatch(
                                         UserActions.USER_CADASTRO,
                                         UserActions.KEY_TEXT, "sucesso"
                                 );
                             } else {
+                                Answers.getInstance().logSignUp(new SignUpEvent().putSuccess(false));
+                                Crashlytics.log(0,"cadastro",e.toString());
                                 dispatcher.dispatch(
                                         UserActions.USER_CADASTRO,
                                         UserActions.KEY_TEXT, "erro"
@@ -115,11 +125,14 @@ public class ActionsCreator {
             @Override
             public void done(ParseUser parseUser, com.parse.ParseException e) {
                 if (parseUser != null) {
+                    Answers.getInstance().logLogin(new LoginEvent().putSuccess(true));
                     dispatcher.dispatch(
                             UserActions.USER_LOGAR,
                             UserActions.KEY_TEXT, "sucesso"
                     );
                 } else {
+                    Answers.getInstance().logLogin(new LoginEvent().putSuccess(false));
+                    Crashlytics.log(0,"login",e.toString());
                     dispatcher.dispatch(
                             UserActions.USER_LOGAR,
                             UserActions.KEY_TEXT, "erro"
@@ -139,15 +152,16 @@ public class ActionsCreator {
 
     public void getAllComentarios(String tipo, String idObject){
         ParseQuery<ParseObject> query = ParseQuery.getQuery(tipo);
-        if(tipo.equals("ComentarioProjeto")){
-            ParseObject projeto = ParseObject.createWithoutData("Proposicao", idObject);
-            query.whereEqualTo("proposicao", projeto);
-        }else{
-            ParseObject politico = ParseObject.createWithoutData("Politico", idObject);
-            query.whereEqualTo("politico", politico);
+        if(!tipo.equals("Comentario")) {
+            if (tipo.equals("ComentarioProjeto")) {
+                ParseObject projeto = ParseObject.createWithoutData("Proposicao", idObject);
+                query.whereEqualTo("proposicao", projeto);
+            } else {
+                ParseObject politico = ParseObject.createWithoutData("Politico", idObject);
+                query.whereEqualTo("politico", politico);
+            }
         }
         query.include("user");
-        query.include("usuario");
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -170,14 +184,24 @@ public class ActionsCreator {
         if(user!= null){
             ParseObject comentario =new ParseObject(tipo);
             ParseObject object;
-            if(!tipo.equals("ComentarioProjeto")){
-                //busca politico
-                object = ParseObject.createWithoutData("Politico", idObject);
+            if(!tipo.equals("Comentario")) {
+                if (!tipo.equals("ComentarioProjeto")) {
+                    //busca politico
+                    object = ParseObject.createWithoutData("Politico", idObject);
 
-                comentario.put("politico",object);
-            }else{
-                object = ParseObject.createWithoutData("Proposicao", idObject);
-                comentario.put("proposicao",object);
+                    comentario.put("politico", object);
+                } else {
+                    object = ParseObject.createWithoutData("Proposicao", idObject);
+                    comentario.put("proposicao", object);
+                }
+                //incrementa o numero de cometarios
+                object.fetchInBackground(new GetCallback<ParseObject>() {
+                    @Override
+                    public void done(ParseObject object, ParseException e) {
+                        object.increment("nr_comentarios");
+                        object.saveInBackground();
+                    }
+                });
             }
             comentario.put("tx_comentario",mensagem);
             comentario.put("user", user);
@@ -193,14 +217,7 @@ public class ActionsCreator {
                 }
             });
 
-            //incrementa o numero de cometarios
-            object.fetchInBackground(new GetCallback<ParseObject>() {
-                @Override
-                public void done(ParseObject object, ParseException e) {
-                    object.increment("nr_comentarios");
-                    object.saveInBackground();
-                }
-            });
+
 
 
         }else{
@@ -637,7 +654,7 @@ public class ActionsCreator {
      * @param casa camara ou senado
      */
     public void getAllPoliticos(String casa, String ordem) {
-        //se tipo
+
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Politico");
         query.whereEqualTo("tipo",casa);
         if(ordem.equals("nome"))
@@ -645,6 +662,36 @@ public class ActionsCreator {
         else{
             query.addDescendingOrder(ordem);
         }
+        //verifica filtros
+        if(null != getItemConfiguracao("ufSelecionada")){
+            query.whereEqualTo("uf",getItemConfiguracao("ufSelecionada"));
+        }
+        if(null != getItemConfiguracao("partidoSelecionada")){
+            query.whereEqualTo("siglaPartido",getItemConfiguracao("partidoSelecionada"));
+        }
+        if(null != getItemConfiguracao("anoSelecionada")){
+            //somente para cotas
+            ParseQuery<ParseObject> innerQuery = query;
+            query = ParseQuery.getQuery("CotaPorAno");
+            query.whereEqualTo("ano",Integer.valueOf(getItemConfiguracao("anoSelecionada")));
+            query.whereMatchesQuery("politico", innerQuery);
+            query.include("politico");
+            query.addDescendingOrder("total");
+        }
+        if(null != getItemConfiguracao("categoriaSelecionada")){
+            //somente para cotas
+            ParseQuery<ParseObject> innerQuery = query;
+            query = ParseQuery.getQuery("CotaXCategoria");
+            if(null != getItemConfiguracao("anoSelecionada")){
+                query.whereEqualTo("ano",Integer.valueOf(getItemConfiguracao("anoSelecionada")));
+            }
+            query.whereEqualTo("tpCota",getItemConfiguracao("categoriaSelecionada"));
+            query.whereMatchesQuery("politico", innerQuery);
+            query.include("politico");
+            query.addDescendingOrder("total");
+        }
+
+
         query.setLimit(1000);
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -982,7 +1029,9 @@ public class ActionsCreator {
      * @return lista de partidos na nuvem
      */
     public List<String> getPartidos() {
+
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Partido");
+        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
         query.addAscendingOrder("nome");
         List<ParseObject> partidos = null;
         try {
@@ -993,6 +1042,32 @@ public class ActionsCreator {
             while (it.hasNext()){
                 ParseObject partido = it.next();
                 retorno.add(partido.getString("nome"));
+            }
+            return retorno;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Busca os categorias de cotas
+     * @return lista de categorias na nuvem
+     */
+    public List<String> getCategoriasCotas() {
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Subcota");
+        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
+        query.addAscendingOrder("txt_descricao");
+        List<ParseObject> categorias = null;
+        try {
+            categorias = query.find();
+            ParseObject.pinAll(categorias);
+            List<String> retorno = new ArrayList<>();
+            Iterator<ParseObject> it = categorias.iterator();
+            while (it.hasNext()){
+                ParseObject cat = it.next();
+                retorno.add(cat.getString("txt_descricao"));
             }
             return retorno;
         } catch (ParseException e) {

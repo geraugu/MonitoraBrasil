@@ -14,6 +14,7 @@ public interface PoliticoActions {
     String POLITICO_GET_PRESENCA = "politico_get_presenca";
     String KEY_TEXT = "key-text";
     String KEY_ID = "key-id";
+    String POLITICO_GET_FILTRO = "politico_get_filtro";
 
 
 }

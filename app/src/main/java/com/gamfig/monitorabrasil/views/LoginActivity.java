@@ -6,9 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -23,6 +23,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.UserActions;
@@ -395,6 +397,7 @@ public class LoginActivity extends AppCompatActivity {
                                 public void done(ParseException e) {
                                     showProgress(false);
                                     if (null == e) {
+                                        Answers.getInstance().logCustom(new CustomEvent("Cadastro atualizado"));
                                         Toast.makeText(LoginActivity.this, getString(R.string.cadastro_atualizado), Toast.LENGTH_LONG).show();
                                     } else {
                                         try {
@@ -513,6 +516,7 @@ public class LoginActivity extends AppCompatActivity {
 
         showProgress(true);
         actionsCreator.cadastrar(nome, password, email,mParseFile);
+
     }
 
 

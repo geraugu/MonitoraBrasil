@@ -21,6 +21,10 @@
             android:id="@+id/chart1"
             android:layout_width="match_parent"
             android:layout_height="450dp" />
+        <com.github.mikephil.charting.charts.HorizontalBarChart
+            android:id="@+id/chart2"
+            android:layout_width="match_parent"
+            android:layout_height="450dp" />
 
         <View
             android:layout_width="match_parent"

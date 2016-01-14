@@ -54,12 +54,20 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
+
         ParseObject politico = politicos.get(i);
+        Number gasto;
+        if(politico.getParseObject("politico")!= null){
+            gasto = politico.getNumber("total");
+            politico = politico.getParseObject("politico");
+        }else{
+            gasto = politico.getNumber("gastos");
+        }
         politico.pinInBackground();
         viewHolder.mTextView.setText(politico.get("nome").toString());
-        viewHolder.txtPartido.setText(politico.get("siglaPartido").toString()+"-"+politico.getString("uf"));
+        viewHolder.txtPartido.setText(String.format("%s-%s",politico.get("siglaPartido").toString(),politico.getString("uf")));
         if(politico.getNumber("faltas")!=null)
-            viewHolder.txtFaltas.setText("Faltas: "+politico.getNumber("faltas").toString());
+            viewHolder.txtFaltas.setText(String.format("Faltas: %f",politico.getNumber("faltas").floatValue()));
         else
             viewHolder.txtFaltas.setVisibility(View.GONE);
         if(politico.getString("twitter")!= null)
@@ -69,12 +77,13 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
             viewHolder.txtTwitter.setVisibility(View.GONE);
 
         if(politico.getNumber("gastos")==null)
-            viewHolder.txtGastos.setText("Gasto: não disponível");
+            viewHolder.txtGastos.setText("Gastos: não disponível");
         else
-            viewHolder.txtGastos.setText("Gasto: R$ "+mFormat.format(politico.getNumber("gastos")) );
+            viewHolder.txtGastos.setText("Gastos: R$ "+mFormat.format(gasto) );
         viewHolder.rb.setRating((float)politico.getDouble("mediaAvaliacao"));
 
         Imagens.getFotoPolitico(politico,viewHolder.foto);
+        Imagens.getImagemPartido(politico.get("siglaPartido").toString(),viewHolder.imgPartido);
 
     }
 
@@ -99,6 +108,7 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         public TextView txtTwitter;
         public TextView txtFaltas;
         public ImageView foto;
+        public ImageView imgPartido;
         public RatingBar rb;
         public ViewHolder(View v) {
             super(v);
@@ -108,6 +118,7 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
             txtPartido = (TextView) v.findViewById(R.id.txtPartido);
             txtGastos = (TextView) v.findViewById(R.id.txtGastos);
             foto  = (ImageView)v.findViewById(R.id.foto);
+            imgPartido  = (ImageView)v.findViewById(R.id.imgPartido);
             rb = (RatingBar)v.findViewById(R.id.ratingBar);
 
             itemView.setOnClickListener(this);

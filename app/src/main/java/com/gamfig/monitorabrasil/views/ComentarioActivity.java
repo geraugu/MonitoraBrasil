@@ -48,16 +48,22 @@ public class ComentarioActivity extends AppCompatActivity {
         setupView();
 
         pb.setVisibility(View.VISIBLE);
+        if (getIntent().getStringExtra("tipo")!= null){
+            //comentarios da primeira pg
+            idObjeto = null;
+            tipo = "Comentario";
+        }else{
+            if (getIntent().getStringExtra("projeto")!= null){
+                idObjeto = getIntent().getStringExtra("projeto");
+                tipo="ComentarioProjeto";
 
-        if (getIntent().getStringExtra("projeto")!= null){
-            idObjeto = getIntent().getStringExtra("projeto");
-            tipo="ComentarioProjeto";
+            }
+            else{
+                idObjeto = getIntent().getStringExtra(ParlamentarDetailActivity.ID_POLITICO);
+                tipo="ComentarioPolitico";
+            }
+        }
 
-        }
-        else{
-            idObjeto = getIntent().getStringExtra(ParlamentarDetailActivity.ID_POLITICO);
-            tipo="ComentarioPolitico";
-        }
         actionsCreator.getAllComentarios(tipo,idObjeto);
 
     }
