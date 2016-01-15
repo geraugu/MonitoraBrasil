@@ -4,6 +4,7 @@ package com.gamfig.monitorabrasil.views.fragments;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -50,6 +51,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     private HorizontalBarChart mHorizontalChart;
     private Typeface tf;
     private Grafico grafico;
+    private NestedScrollView mNestedScroll;
 
 
     public GastosFragment() {
@@ -84,6 +86,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_gastos, container, false);
+        mNestedScroll = (NestedScrollView)rootView;
         initDependencies();
         //busca as informacoes do politico
         politico = actionsCreator.getPolitico(idPolitico);
@@ -141,6 +144,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
         mChart.highlightValues(null);
         mChart.setDrawSliceText(!mChart.isDrawSliceTextEnabled());
         mChart.invalidate();
+        mNestedScroll.scrollTo(0, 0);
     }
 
 

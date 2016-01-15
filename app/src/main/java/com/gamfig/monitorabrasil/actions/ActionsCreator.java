@@ -1,10 +1,15 @@
 package com.gamfig.monitorabrasil.actions;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.crashlytics.android.answers.LoginEvent;
+import com.crashlytics.android.answers.SearchEvent;
 import com.crashlytics.android.answers.SignUpEvent;
+import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Pergunta;
@@ -649,6 +654,20 @@ public class ActionsCreator {
         return null;
     }
 
+    public void getAllPoliticos(){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Politico");
+
+        query.setLimit(1000);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, com.parse.ParseException e) {
+                ParseObject.pinAllInBackground(list);
+            }
+        });
+        getPartidos(true);
+        getCategoriasCotas(true);
+    }
+
     /**
      * Busca os politicos de uma casa especifica
      * @param casa camara ou senado
@@ -656,6 +675,7 @@ public class ActionsCreator {
     public void getAllPoliticos(String casa, String ordem) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Politico");
+        query.fromLocalDatastore();
         query.whereEqualTo("tipo",casa);
         if(ordem.equals("nome"))
             query.addAscendingOrder("nome");
@@ -663,29 +683,29 @@ public class ActionsCreator {
             query.addDescendingOrder(ordem);
         }
         //verifica filtros
-        if(null != getItemConfiguracao("ufSelecionada")){
-            query.whereEqualTo("uf",getItemConfiguracao("ufSelecionada"));
+        if(null != getValorSharedPreferences("ufSelecionada")){
+            query.whereEqualTo("uf",getValorSharedPreferences("ufSelecionada"));
         }
-        if(null != getItemConfiguracao("partidoSelecionada")){
-            query.whereEqualTo("siglaPartido",getItemConfiguracao("partidoSelecionada"));
+        if(null != getValorSharedPreferences("partidoSelecionada")){
+            query.whereEqualTo("siglaPartido",getValorSharedPreferences("partidoSelecionada"));
         }
-        if(null != getItemConfiguracao("anoSelecionada")){
+        if(null != getValorSharedPreferences("anoSelecionada")){
             //somente para cotas
             ParseQuery<ParseObject> innerQuery = query;
             query = ParseQuery.getQuery("CotaPorAno");
-            query.whereEqualTo("ano",Integer.valueOf(getItemConfiguracao("anoSelecionada")));
+            query.whereEqualTo("ano",Integer.valueOf(getValorSharedPreferences("anoSelecionada")));
             query.whereMatchesQuery("politico", innerQuery);
             query.include("politico");
             query.addDescendingOrder("total");
         }
-        if(null != getItemConfiguracao("categoriaSelecionada")){
+        if(null != getValorSharedPreferences("categoriaSelecionada")){
             //somente para cotas
             ParseQuery<ParseObject> innerQuery = query;
             query = ParseQuery.getQuery("CotaXCategoria");
-            if(null != getItemConfiguracao("anoSelecionada")){
-                query.whereEqualTo("ano",Integer.valueOf(getItemConfiguracao("anoSelecionada")));
+            if(null != getValorSharedPreferences("anoSelecionada")){
+                query.whereEqualTo("ano",Integer.valueOf(getValorSharedPreferences("anoSelecionada")));
             }
-            query.whereEqualTo("tpCota",getItemConfiguracao("categoriaSelecionada"));
+            query.whereEqualTo("tpCota",getValorSharedPreferences("categoriaSelecionada"));
             query.whereMatchesQuery("politico", innerQuery);
             query.include("politico");
             query.addDescendingOrder("total");
@@ -696,11 +716,7 @@ public class ActionsCreator {
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, com.parse.ParseException e) {
-                try {
-                    ParseObject.pinAll(list);
-                } catch (ParseException e1) {
-                    e1.printStackTrace();
-                }
+                ParseObject.pinAllInBackground(list);
                 if (e == null) {
                     dispatcher.dispatch(
                             PoliticoActions.POLITICO_GET_ALL,
@@ -806,20 +822,6 @@ public class ActionsCreator {
         return null;
     }
 
-    /**
-     * busca a classe configuracao
-     * @return configuracao
-     */
-    public ParseObject getConfiguracao() {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Configuracao");
-        query.fromLocalDatastore();
-        try {
-            return query.getFirst();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public void avaliar(ParseObject mPolitico, float rating, ParseObject mAvaliacao) {
         double ultimaAvaliacao=0;
@@ -1022,21 +1024,25 @@ public class ActionsCreator {
 
 
         });
+        Answers.getInstance().logSearch(new SearchEvent()
+                .putQuery(chave));
     }
 
     /**
      * Busca os partidos
      * @return lista de partidos na nuvem
      */
-    public List<String> getPartidos() {
+    public List<String> getPartidos(boolean nuvem) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Partido");
-        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
+        if(!nuvem)
+            query.fromLocalDatastore();
         query.addAscendingOrder("nome");
         List<ParseObject> partidos = null;
         try {
             partidos = query.find();
-            ParseObject.pinAll(partidos);
+            if(nuvem)
+                ParseObject.pinAllInBackground(partidos);
             List<String> retorno = new ArrayList<>();
             Iterator<ParseObject> it = partidos.iterator();
             while (it.hasNext()){
@@ -1054,15 +1060,17 @@ public class ActionsCreator {
      * Busca os categorias de cotas
      * @return lista de categorias na nuvem
      */
-    public List<String> getCategoriasCotas() {
+    public List<String> getCategoriasCotas(boolean nuvem) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Subcota");
-        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
+        if(!nuvem)
+            query.fromLocalDatastore();
         query.addAscendingOrder("txt_descricao");
         List<ParseObject> categorias = null;
         try {
             categorias = query.find();
-            ParseObject.pinAll(categorias);
+            if(nuvem)
+                ParseObject.pinAllInBackground(categorias);
             List<String> retorno = new ArrayList<>();
             Iterator<ParseObject> it = categorias.iterator();
             while (it.hasNext()){
@@ -1076,40 +1084,6 @@ public class ActionsCreator {
         return null;
     }
 
-    /**
-     * Salva o parametro em configuracao
-     *
-     * @param parametro nome do parametro
-     * @param valor valor do parametro
-     */
-    public void salvaParametroConfiguracao(String parametro, String valor) {
-        ParseObject conf = getConfiguracao();
-        if(conf == null)
-            conf = new ParseObject("Configuracao");
-        conf.put(parametro,valor);
-        try {
-            conf.pin();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * Busca o item configuracao
-     * @param item nome do item
-     * @return string do valor
-     */
-    public String getItemConfiguracao(String item) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Configuracao");
-        query.fromLocalDatastore();
-        try {
-            return query.getFirst().getString(item);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * Salva o monitoramento do usuario e politico
@@ -1160,12 +1134,24 @@ public class ActionsCreator {
         query.whereEqualTo("politico",politico);
         query.whereEqualTo("user",ParseUser.getCurrentUser());
         try {
-            if(query.getFirst() != null){
+            if(query.find().size() > 0){
                 return true;
             }
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public void salvaNoSharedPreferences(String nome, String valor){
+        SharedPreferences sharedPref = AppController.getInstance().getSharedPreferences("com.monitorabrasil.CHAVE_PREFERENCIA",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(nome, valor);
+        editor.commit();
+    }
+
+    public String getValorSharedPreferences(String nome){
+        SharedPreferences sharedPref = AppController.getInstance().getSharedPreferences("com.monitorabrasil.CHAVE_PREFERENCIA",Context.MODE_PRIVATE);
+        return sharedPref.getString(nome,null);
     }
 }

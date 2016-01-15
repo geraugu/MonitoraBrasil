@@ -11,16 +11,17 @@
         android:orientation="vertical" >
 
         <!-- THIS IS JUST A PLACEHOLDER -->
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/chart1"
+            android:layout_width="match_parent"
+            android:layout_height="450dp" />
         <android.support.v7.widget.RecyclerView
             android:id="@+id/my_recycler_view"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="600dp"/>
 
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/chart1"
-            android:layout_width="match_parent"
-            android:layout_height="450dp" />
+
         <com.github.mikephil.charting.charts.HorizontalBarChart
             android:id="@+id/chart2"
             android:layout_width="match_parent"

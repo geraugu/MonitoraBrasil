@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="350dp"
     android:layout_height="wrap_content"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
@@ -13,7 +13,8 @@
         android:text="@string/uf"
         android:id="@+id/lblUf"
         android:textSize="20dp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:textStyle="bold" />
     <Spinner
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -25,7 +26,8 @@
         android:layout_height="wrap_content"
         android:text="@string/partido"
         android:textSize="20dp"
-        android:id="@+id/lblPartido" />
+        android:id="@+id/lblPartido"
+        android:textStyle="bold" />
     <Spinner
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -42,6 +44,7 @@
             android:layout_width="97dp"
             android:layout_height="wrap_content"
             android:text="@string/categoria"
+            android:textStyle="bold"
             android:textSize="20dp" />
 
         <Spinner
@@ -54,12 +57,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/llAno"
+        android:visibility="gone"
         android:orientation="vertical" >
 
         <TextView
             android:layout_width="97dp"
             android:layout_height="wrap_content"
             android:text="@string/ano"
+            android:textStyle="bold"
             android:textSize="20dp" />
 
         <Spinner
@@ -78,7 +83,7 @@
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:measureWithLargestChild="true"
         android:layout_below="@+id/llCategoria"
@@ -94,7 +99,8 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/limpar" />
+            android:text="@string/limpar"
+            android:layout_marginLeft="5dp" />
 
         <Button
             android:id="@+id/cancel"
@@ -102,7 +108,9 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@android:string/cancel" />
+            android:text="@android:string/cancel"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp" />
 
         <Button
             android:id="@+id/ok"

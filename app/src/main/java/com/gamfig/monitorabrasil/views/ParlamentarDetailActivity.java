@@ -73,10 +73,15 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         }
 
 
+        try {
+            politico.fetchIfNeeded();
+            Answers.getInstance().logContentView(new ContentViewEvent()
+                    .putContentName("Ficha")
+                    .putContentType(politico.getString( "nome")));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
-        Answers.getInstance().logContentView(new ContentViewEvent()
-                .putContentName("Ficha")
-                .putContentType(politico.getString( "nome")));
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -126,7 +131,7 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
                             .setAction("Action", null).show();
                 }
                 try {
-                    actionsCreator.salvaUsuarioPolitico(politico,true);
+                    actionsCreator.salvaUsuarioPolitico(politico,estaMonitorando);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }

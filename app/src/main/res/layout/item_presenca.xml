@@ -94,7 +94,7 @@
             android:textSize="24dp"
             android:layout_gravity="right"
             android:layout_weight="0"
-            android:layout_above="@+id/textView8"
+            android:layout_below="@+id/txtFaltaJust"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
 

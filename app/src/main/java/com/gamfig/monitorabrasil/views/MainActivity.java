@@ -40,7 +40,9 @@ import com.gamfig.monitorabrasil.views.dialogs.DialogGostou;
 import com.gamfig.monitorabrasil.views.util.Card;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.parse.ConfigCallback;
 import com.parse.GetDataCallback;
+import com.parse.ParseConfig;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
@@ -113,6 +115,24 @@ public class MainActivity extends AppCompatActivity
                 startActivity(it);
             }
         });
+
+        //se primeira vez, buscar os politico
+        ParseConfig.getInBackground(new ConfigCallback() {
+            @Override
+            public void done(ParseConfig config, ParseException e) {
+                String data = config.getString("dtAtualizacaoPoliltico");
+                if(actionsCreator.getValorSharedPreferences("dataAtualizacao")==null) {
+                    actionsCreator.salvaNoSharedPreferences("dataAtualizacao", data);
+                    actionsCreator.getAllPoliticos();
+                }else{
+                    if(!actionsCreator.getValorSharedPreferences("dataAtualizacao").equals(data)){
+                        actionsCreator.salvaNoSharedPreferences("dataAtualizacao",data);
+                        actionsCreator.getAllPoliticos();
+                    }
+                }
+            }
+        });
+
 
         //monta card do dialoga
         pbDialoga.setVisibility(View.VISIBLE);

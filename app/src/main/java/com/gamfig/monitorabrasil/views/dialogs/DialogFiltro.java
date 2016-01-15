@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.gamfig.monitorabrasil.R;
@@ -24,8 +25,11 @@ import java.util.Calendar;
  * Created by Geraldo on 07/01/2016.
  */
 public class DialogFiltro extends DialogFragment {
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
 
     private String titulo;
+    private String tipo;
 
     private DialogInterface.OnDismissListener onDismissListener;
 
@@ -39,9 +43,26 @@ public class DialogFiltro extends DialogFragment {
     private Spinner spnCategoria;
     private Spinner spnAno;
 
+    public static DialogFiltro newInstance(String titulo, String tipo)
+    {
+        DialogFiltro myFragment = new DialogFiltro();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, titulo);
+        args.putString(ARG_PARAM2, tipo);
+        myFragment.setArguments(args);
+        return myFragment;
+    }
+    public DialogFiltro() {
 
-    public DialogFiltro( String titulo) {
-        this.titulo=titulo;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            titulo = getArguments().getString(ARG_PARAM1);
+            tipo = getArguments().getString(ARG_PARAM2);
+        }
     }
 
 
@@ -63,6 +84,22 @@ public class DialogFiltro extends DialogFragment {
 
     private void setupView(View view) {
 
+        LinearLayout llCategoria = (LinearLayout)view.findViewById(R.id.llCategoria);
+        LinearLayout llAno = (LinearLayout)view.findViewById(R.id.llAno);
+        switch (tipo){
+            case "politico":
+                llCategoria.setVisibility(View.GONE);
+                break;
+            case "gasto":
+                llCategoria.setVisibility(View.VISIBLE);
+                llAno.setVisibility(View.VISIBLE);
+                break;
+            case "projeto":
+                llCategoria.setVisibility(View.GONE);
+                llAno.setVisibility(View.VISIBLE);
+                break;
+        }
+
         spnAno = (Spinner) view.findViewById(R.id.spnAno);
         spnCategoria = (Spinner) view.findViewById(R.id.spnCategoria);
         spnUf = (Spinner) view.findViewById(R.id.spnUf);
@@ -73,8 +110,8 @@ public class DialogFiltro extends DialogFragment {
                 getContext(), R.array.todasufs, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnUf.setAdapter(adapter);
-        if(actionsCreator.getItemConfiguracao("ufPosSelecionada")!= null){
-            int ufPos = Integer.valueOf(actionsCreator.getItemConfiguracao("ufPosSelecionada"));
+        if(actionsCreator.getValorSharedPreferences("ufPosSelecionada")!= null){
+            int ufPos = Integer.valueOf(actionsCreator.getValorSharedPreferences("ufPosSelecionada"));
             if(ufPos > 0){
                 spnUf.setSelection(ufPos,true);
             }
@@ -82,12 +119,15 @@ public class DialogFiltro extends DialogFragment {
         }
 
         //spinner Partido
+        ArrayList<String> arrayStrings = new ArrayList<String>();
+        arrayStrings.add(0,"Todos Partidos");
+        arrayStrings.addAll(actionsCreator.getPartidos(false));
         ArrayAdapter<String> adapterPartido = new ArrayAdapter<String>(getContext(),
-                android.R.layout.simple_spinner_item, actionsCreator.getPartidos());
+                android.R.layout.simple_spinner_item, arrayStrings);
         adapterPartido.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnPartido.setAdapter(adapterPartido);
-        if(actionsCreator.getItemConfiguracao("partidoPosSelecionada")!= null){
-            int pos = Integer.valueOf(actionsCreator.getItemConfiguracao("partidoPosSelecionada"));
+        if(actionsCreator.getValorSharedPreferences("partidoPosSelecionada")!= null){
+            int pos = Integer.valueOf(actionsCreator.getValorSharedPreferences("partidoPosSelecionada"));
             if(pos > 0){
                 spnPartido.setSelection(pos,true);
             }
@@ -96,6 +136,7 @@ public class DialogFiltro extends DialogFragment {
 
         //spinner Ano
         ArrayList<String> years = new ArrayList<String>();
+        years.add(0,"");
         int thisYear = Calendar.getInstance().get(Calendar.YEAR);
         for (int i = 2015; i <= thisYear; i++) {
             years.add(Integer.toString(i));
@@ -104,8 +145,8 @@ public class DialogFiltro extends DialogFragment {
                 android.R.layout.simple_spinner_item, years);
         adapterAno.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnAno.setAdapter(adapterAno);
-        if(actionsCreator.getItemConfiguracao("anoPosSelecionada")!= null){
-            int pos = Integer.valueOf(actionsCreator.getItemConfiguracao("anoPosSelecionada"));
+        if(actionsCreator.getValorSharedPreferences("anoPosSelecionada")!= null){
+            int pos = Integer.valueOf(actionsCreator.getValorSharedPreferences("anoPosSelecionada"));
             if(pos > 0){
                 spnAno.setSelection(pos,true);
             }
@@ -113,12 +154,15 @@ public class DialogFiltro extends DialogFragment {
         }
 
         //spinner Categoria
+        ArrayList<String> arrayCategoria = new ArrayList<String>();
+        arrayCategoria.add(0,"Todas Categorias");
+        arrayCategoria.addAll(actionsCreator.getCategoriasCotas(false));
         ArrayAdapter<String> adapterCategoria = new ArrayAdapter<String>(getContext(),
-                android.R.layout.simple_spinner_item, actionsCreator.getCategoriasCotas());
+                android.R.layout.simple_spinner_item, arrayCategoria);
         adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnCategoria.setAdapter(adapterCategoria);
-        if(actionsCreator.getItemConfiguracao("categoriaPosSelecionada")!= null){
-            int pos = Integer.valueOf(actionsCreator.getItemConfiguracao("categoriaPosSelecionada"));
+        if(actionsCreator.getValorSharedPreferences("categoriaPosSelecionada")!= null){
+            int pos = Integer.valueOf(actionsCreator.getValorSharedPreferences("categoriaPosSelecionada"));
             if(pos > 0){
                 spnCategoria.setSelection(pos,true);
             }
@@ -141,14 +185,14 @@ public class DialogFiltro extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                actionsCreator.salvaParametroConfiguracao("ufPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("partidoPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("anoPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("categoriaPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("ufSelecionada",null);
-                actionsCreator.salvaParametroConfiguracao("partidoSelecionada",null);
-                actionsCreator.salvaParametroConfiguracao("anoSelecionada",null);
-                actionsCreator.salvaParametroConfiguracao("categoriaSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("ufPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("partidoPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("anoPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("categoriaPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("ufSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("partidoSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("anoSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("categoriaSelecionada",null);
 
                 spnUf.setSelection(0,true);
                 spnPartido.setSelection(0,true);
@@ -165,23 +209,45 @@ public class DialogFiltro extends DialogFragment {
             public void onClick(final View v) {
                 //salva os filtros selecionados
                 int ufSelecionadaPosition = spnUf.getSelectedItemPosition();
-                actionsCreator.salvaParametroConfiguracao("ufPosSelecionada",String.valueOf(ufSelecionadaPosition));
-                actionsCreator.salvaParametroConfiguracao("ufSelecionada",spnUf.getAdapter().getItem(ufSelecionadaPosition).toString());
+                actionsCreator.salvaNoSharedPreferences("ufPosSelecionada", String.valueOf(ufSelecionadaPosition));
+
+                if(ufSelecionadaPosition == 0) {
+                    actionsCreator.salvaNoSharedPreferences("ufSelecionada", null);
+                }else{
+                    actionsCreator.salvaNoSharedPreferences("ufSelecionada", spnUf.getAdapter().getItem(ufSelecionadaPosition).toString());
+                }
 
                 int partidoSelecionadaPosition = spnPartido.getSelectedItemPosition();
-                actionsCreator.salvaParametroConfiguracao("partidoPosSelecionada",String.valueOf(partidoSelecionadaPosition));
-                actionsCreator.salvaParametroConfiguracao("partidoSelecionada",spnPartido.getAdapter().getItem(partidoSelecionadaPosition).toString());
+                actionsCreator.salvaNoSharedPreferences("partidoPosSelecionada", String.valueOf(partidoSelecionadaPosition));
+                if(partidoSelecionadaPosition == 0) {
+                    actionsCreator.salvaNoSharedPreferences("partidoSelecionada", null);
+                }else{
+                    actionsCreator.salvaNoSharedPreferences("partidoSelecionada", spnPartido.getAdapter().getItem(partidoSelecionadaPosition).toString());
+                }
 
                 int anoSelecionadaPosition = spnAno.getSelectedItemPosition();
-                actionsCreator.salvaParametroConfiguracao("anoPosSelecionada",String.valueOf(anoSelecionadaPosition));
-                actionsCreator.salvaParametroConfiguracao("anoSelecionada",spnAno.getAdapter().getItem(anoSelecionadaPosition).toString());
+                actionsCreator.salvaNoSharedPreferences("anoPosSelecionada", String.valueOf(anoSelecionadaPosition));
+
+                if(anoSelecionadaPosition == 0) {
+                    actionsCreator.salvaNoSharedPreferences("anoSelecionada", null);
+                }else{
+                    actionsCreator.salvaNoSharedPreferences("anoSelecionada", spnAno.getAdapter().getItem(anoSelecionadaPosition).toString());
+                }
 
                 int categoriaSelecionadaPosition = spnCategoria.getSelectedItemPosition();
-                actionsCreator.salvaParametroConfiguracao("categoriaPosSelecionada",String.valueOf(categoriaSelecionadaPosition));
-                actionsCreator.salvaParametroConfiguracao("categoriSelecionada",spnCategoria.getAdapter().getItem(categoriaSelecionadaPosition).toString());
+                actionsCreator.salvaNoSharedPreferences("categoriaPosSelecionada", String.valueOf(categoriaSelecionadaPosition));
+
+                if(categoriaSelecionadaPosition == 0) {
+                    actionsCreator.salvaNoSharedPreferences("categoriSelecionada",
+                            null);
+                }else{
+                    actionsCreator.salvaNoSharedPreferences("categoriSelecionada",
+                            spnCategoria.getAdapter().getItem(categoriaSelecionadaPosition).toString());
+                }
                 getDialog().dismiss();
             }
         });
+
 
     }
 

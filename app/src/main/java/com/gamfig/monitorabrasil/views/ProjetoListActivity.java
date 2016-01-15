@@ -85,10 +85,19 @@ public class ProjetoListActivity extends AppCompatActivity
             //casa (camara ou senado)
             if(getIntent().getExtras().getString("casa") != null) {
                 casa = getIntent().getExtras().getString("casa");
-                actionsCreator.salvaParametroConfiguracao("casa",casa);
+                actionsCreator.salvaNoSharedPreferences("casa",casa);
+                //limpa o filtro
+                actionsCreator.salvaNoSharedPreferences("ufPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("partidoPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("anoPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("categoriaPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("ufSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("partidoSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("anoSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("categoriaSelecionada",null);
             }
         }else {
-            casa = actionsCreator.getItemConfiguracao("casa");
+            casa = actionsCreator.getValorSharedPreferences("casa");
         }
         Answers.getInstance().logContentView(new ContentViewEvent()
                 .putContentName("Lista Projetos")
@@ -181,7 +190,7 @@ public class ProjetoListActivity extends AppCompatActivity
         int id = item.getItemId();
         if(id == R.id.action_filter){
             //abrir o dialog para filtrar
-            DialogFiltro filtro = new DialogFiltro("Escolha os filtros");
+            DialogFiltro filtro = DialogFiltro.newInstance("Escolha um filtro","projeto");
             filtro.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {

@@ -12,9 +12,9 @@ import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.model.Imagens;
+import com.gamfig.monitorabrasil.util.MyValueFormatter;
 import com.parse.ParseObject;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,15 +27,14 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
     private List<ParseObject> politicos;
     private RecyclerViewOnClickListenerHack mRecyclerViewOnClickListenerHack;
 
-    private NumberFormat mFormat;
+    private MyValueFormatter mFormat;
     private String tipo;//camara ou senado
 
     public PoliticoAdapter(ActionsCreator actionsCreator, String tipo) {
         politicos = new ArrayList<>();
         PoliticoAdapter.actionsCreator = actionsCreator;
         this.tipo = tipo;
-        mFormat = NumberFormat.getInstance();
-        mFormat.setMaximumFractionDigits(2);
+        mFormat = new MyValueFormatter();
     }
 
     @Override
@@ -57,17 +56,22 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
 
         ParseObject politico = politicos.get(i);
         Number gasto;
+       // gasto = politico.getNumber("gastos");
         if(politico.getParseObject("politico")!= null){
             gasto = politico.getNumber("total");
             politico = politico.getParseObject("politico");
+            viewHolder.txtRank.setText(String.format("%d",(i+1)));
+            viewHolder.txtRank.setVisibility(View.VISIBLE);
         }else{
             gasto = politico.getNumber("gastos");
+            viewHolder.txtRank.setVisibility(View.GONE);
         }
-        politico.pinInBackground();
+      //  politico.pinInBackground();
+
         viewHolder.mTextView.setText(politico.get("nome").toString());
         viewHolder.txtPartido.setText(String.format("%s-%s",politico.get("siglaPartido").toString(),politico.getString("uf")));
         if(politico.getNumber("faltas")!=null)
-            viewHolder.txtFaltas.setText(String.format("Faltas: %f",politico.getNumber("faltas").floatValue()));
+            viewHolder.txtFaltas.setText(String.format("Faltas: %d",politico.getNumber("faltas").intValue()));
         else
             viewHolder.txtFaltas.setVisibility(View.GONE);
         if(politico.getString("twitter")!= null)
@@ -79,7 +83,7 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         if(politico.getNumber("gastos")==null)
             viewHolder.txtGastos.setText("Gastos: não disponível");
         else
-            viewHolder.txtGastos.setText("Gastos: R$ "+mFormat.format(gasto) );
+            viewHolder.txtGastos.setText("Gastos: R$ "+mFormat.formata(gasto.floatValue()) );
         viewHolder.rb.setRating((float)politico.getDouble("mediaAvaliacao"));
 
         Imagens.getFotoPolitico(politico,viewHolder.foto);
@@ -107,11 +111,13 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         public TextView txtGastos;
         public TextView txtTwitter;
         public TextView txtFaltas;
+        public TextView txtRank;
         public ImageView foto;
         public ImageView imgPartido;
         public RatingBar rb;
         public ViewHolder(View v) {
             super(v);
+            txtRank = (TextView) v.findViewById(R.id.txtRank);
             mTextView = (TextView) v.findViewById(R.id.txtNome);
             txtTwitter = (TextView) v.findViewById(R.id.txtTwitter);
             txtFaltas = (TextView) v.findViewById(R.id.txtFaltas);

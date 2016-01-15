@@ -2,6 +2,7 @@ package com.gamfig.monitorabrasil.views;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -26,6 +27,7 @@ import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.adapters.PoliticoAdapter;
+import com.gamfig.monitorabrasil.views.dialogs.DialogFiltro;
 import com.parse.ParseObject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -76,16 +78,6 @@ public class ParlamentarListActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
         // Show the Up button in the action bar.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -96,27 +88,35 @@ public class ParlamentarListActivity extends AppCompatActivity
             //casa e ordem sao passados
             if(getIntent().getExtras().getString("casa") != null) {
                 casa = getIntent().getExtras().getString("casa");
-                actionsCreator.salvaParametroConfiguracao("casa",casa);
+                actionsCreator.salvaNoSharedPreferences("casa",casa);
                 ordem = getIntent().getExtras().getString("ordem");
-                actionsCreator.salvaParametroConfiguracao("ordem",getIntent().getExtras().getString("ordem"));
+                actionsCreator.salvaNoSharedPreferences("ordem",getIntent().getExtras().getString("ordem"));
 
                 //limpa o filtro
-                actionsCreator.salvaParametroConfiguracao("ufPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("partidoPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("anoPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("categoriaPosSelecionada","0");
-                actionsCreator.salvaParametroConfiguracao("ufSelecionada",null);
-                actionsCreator.salvaParametroConfiguracao("partidoSelecionada",null);
-                actionsCreator.salvaParametroConfiguracao("anoSelecionada",null);
-                actionsCreator.salvaParametroConfiguracao("categoriaSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("ufPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("partidoPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("anoPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("categoriaPosSelecionada","0");
+                actionsCreator.salvaNoSharedPreferences("ufSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("partidoSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("anoSelecionada",null);
+                actionsCreator.salvaNoSharedPreferences("categoriaSelecionada",null);
             }
         }else {
-            casa = actionsCreator.getItemConfiguracao("casa");
-            ordem = actionsCreator.getItemConfiguracao("ordem");
+            casa = actionsCreator.getValorSharedPreferences("casa");
+            ordem = actionsCreator.getValorSharedPreferences("ordem");
         }
         Answers.getInstance().logCustom(new CustomEvent("Lista Politicos")
                 .putCustomAttribute("casa", casa).putCustomAttribute("ordem", ordem));
 
+        String titulo;
+        if(casa.equals("c"))
+            titulo="Deputados Federais";
+        else
+            titulo="Senadores";
+        if(!ordem.equals("nome"))
+            titulo=String.format("Gastos-%s",titulo);
+        setTitle(titulo);
 
         setupView();
         if (findViewById(R.id.parlamentar_detail_container) != null) {
@@ -174,7 +174,24 @@ public class ParlamentarListActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if(id == R.id.action_filter){
+            //abrir o dialog para filtrar
+            String tipo;
+            if(ordem.equals("nome"))
+                tipo = "politico";
+            else
+                tipo = "gasto";
+            DialogFiltro filtro = DialogFiltro.newInstance("Escolha um filtro",tipo);
+            filtro.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    actionsCreator.getAllPoliticos(casa,ordem);
 
+
+                }
+            });
+            filtro.show(getSupportFragmentManager(), "dialogFiltro");
+        }
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
             // activity, the Up button is shown. Use NavUtils to allow users

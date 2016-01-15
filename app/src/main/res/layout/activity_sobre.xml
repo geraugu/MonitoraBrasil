@@ -19,18 +19,20 @@
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:orientation="vertical">
 
-
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/sobre"/>
-<view style="@style/Divider"></view>
+                android:text="@string/sobre"
+                android:textSize="18dp" />
+
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/credito"
                 android:autoLink="email|web"
-                android:text="@string/credito"/>
+                android:text="@string/credito"
+                android:textSize="16dp"
+                android:paddingTop="8dp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:layout_gravity="right"
