@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -28,6 +29,7 @@ import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.adapters.PoliticoAdapter;
 import com.gamfig.monitorabrasil.views.dialogs.DialogFiltro;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -62,6 +64,7 @@ public class ParlamentarListActivity extends AppCompatActivity
     private PoliticoStore politicoStore;
     private RecyclerView mRecyclerView;
     private PoliticoAdapter mAdapter;
+    private ProgressBar pb;
 
     private ViewPager viewPager;
     private TabLayout tabLayout;
@@ -70,6 +73,8 @@ public class ParlamentarListActivity extends AppCompatActivity
     private String ordem;
 
     private boolean realizouBusca;
+
+    private boolean ranking;//se eh ranking ou nao
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,8 +119,11 @@ public class ParlamentarListActivity extends AppCompatActivity
             titulo="Deputados Federais";
         else
             titulo="Senadores";
-        if(!ordem.equals("nome"))
-            titulo=String.format("Gastos-%s",titulo);
+
+        if(!ordem.equals("nome")) {
+            titulo = String.format("Gastos-%s", titulo);
+            ranking=true;
+        }
         setTitle(titulo);
 
         setupView();
@@ -147,6 +155,9 @@ public class ParlamentarListActivity extends AppCompatActivity
 
     private void setupView() {
 
+        pb = (ProgressBar)findViewById(R.id.progressBar2);
+        pb.setVisibility(View.VISIBLE);
+
         //tableview
         mRecyclerView = (RecyclerView) findViewById(R.id.parlamentar_list);
 
@@ -157,7 +168,7 @@ public class ParlamentarListActivity extends AppCompatActivity
         LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(llm);
-        mAdapter = new PoliticoAdapter(actionsCreator,casa);
+        mAdapter = new PoliticoAdapter(actionsCreator,casa,ranking,this);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setRecyclerViewOnClickListenerHack(this);
 
@@ -181,10 +192,11 @@ public class ParlamentarListActivity extends AppCompatActivity
                 tipo = "politico";
             else
                 tipo = "gasto";
-            DialogFiltro filtro = DialogFiltro.newInstance("Escolha um filtro",tipo);
+            DialogFiltro filtro = DialogFiltro.newInstance("Escolha um filtro",tipo,casa);
             filtro.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
+                    pb.setVisibility(View.VISIBLE);
                     actionsCreator.getAllPoliticos(casa,ordem);
 
 
@@ -208,11 +220,39 @@ public class ParlamentarListActivity extends AppCompatActivity
 
     @Override
     public void onClickListener(View view, int position) {
-        final ParseObject politico;
-        if(realizouBusca)
-            politico = politicoStore.getPoliticosFiltro().get(position);
-        else
-            politico = politicoStore.getPoliticos().get(position);
+        ParseObject politico = null;
+        if(realizouBusca) {
+            if (ranking) {
+                ParseObject ranking = politicoStore.getPoliticosFiltro().get(position);
+                try {
+                    ranking.fetch();
+                    politico = ranking.getParseObject("politico");
+                    politico.fetchFromLocalDatastore();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                politico = politicoStore.getPoliticosFiltro().get(position);
+            }
+        }else {
+            if (ranking){
+                ParseObject ranking = politicoStore.getPoliticos().get(position);
+                try {
+                    ranking.fetch();
+                    if(ranking.getString("nome")==null) {
+                        politico = ranking.getParseObject("politico");
+                    }else{
+                        politico = ranking;
+                    }
+                    politico.fetchFromLocalDatastore();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            }else{
+                politico = politicoStore.getPoliticos().get(position);
+            }
+        }
         if (mTwoPane) {
 //            Bundle arguments = new Bundle();
 //            arguments.putString(VereadorDetailFragment.ID_POLITICO,politico.getObjectId());
@@ -260,6 +300,8 @@ public class ParlamentarListActivity extends AppCompatActivity
 
     private void updateUI() {
         mAdapter.setItems(politicoStore.getPoliticos());
+
+        pb.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -299,7 +341,7 @@ public class ParlamentarListActivity extends AppCompatActivity
                 public boolean onQueryTextSubmit(String query) {
                     if (!query.isEmpty()) {
                         //realizar a busca
-                        mAdapter.setItems(politicoStore.filtrar(query));
+                        mAdapter.setItems(politicoStore.filtrar(query, ranking));
                         mAdapter.notifyDataSetChanged();
                         realizouBusca = true;
                     }
@@ -316,7 +358,7 @@ public class ParlamentarListActivity extends AppCompatActivity
                     }else{
                         //realizar a busca
 
-                        mAdapter.setItems(politicoStore.filtrar(newText));
+                        mAdapter.setItems(politicoStore.filtrar(newText,ranking));
                         mAdapter.notifyDataSetChanged();
                         realizouBusca = true;
                     }

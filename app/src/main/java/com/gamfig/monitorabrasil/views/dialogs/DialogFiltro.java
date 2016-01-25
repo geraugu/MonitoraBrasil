@@ -27,9 +27,11 @@ import java.util.Calendar;
 public class DialogFiltro extends DialogFragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
 
     private String titulo;
     private String tipo;
+    private String casa;
 
     private DialogInterface.OnDismissListener onDismissListener;
 
@@ -43,12 +45,13 @@ public class DialogFiltro extends DialogFragment {
     private Spinner spnCategoria;
     private Spinner spnAno;
 
-    public static DialogFiltro newInstance(String titulo, String tipo)
+    public static DialogFiltro newInstance(String titulo, String tipo, String casa)
     {
         DialogFiltro myFragment = new DialogFiltro();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, titulo);
         args.putString(ARG_PARAM2, tipo);
+        args.putString(ARG_PARAM3, casa);
         myFragment.setArguments(args);
         return myFragment;
     }
@@ -62,6 +65,7 @@ public class DialogFiltro extends DialogFragment {
         if (getArguments() != null) {
             titulo = getArguments().getString(ARG_PARAM1);
             tipo = getArguments().getString(ARG_PARAM2);
+            casa = getArguments().getString(ARG_PARAM3);
         }
     }
 
@@ -92,11 +96,11 @@ public class DialogFiltro extends DialogFragment {
                 break;
             case "gasto":
                 llCategoria.setVisibility(View.VISIBLE);
-                llAno.setVisibility(View.VISIBLE);
+                //llAno.setVisibility(View.VISIBLE);
                 break;
             case "projeto":
                 llCategoria.setVisibility(View.GONE);
-                llAno.setVisibility(View.VISIBLE);
+               // llAno.setVisibility(View.VISIBLE);
                 break;
         }
 
@@ -156,7 +160,7 @@ public class DialogFiltro extends DialogFragment {
         //spinner Categoria
         ArrayList<String> arrayCategoria = new ArrayList<String>();
         arrayCategoria.add(0,"Todas Categorias");
-        arrayCategoria.addAll(actionsCreator.getCategoriasCotas(false));
+        arrayCategoria.addAll(actionsCreator.getCategoriasCotas(casa,false));
         ArrayAdapter<String> adapterCategoria = new ArrayAdapter<String>(getContext(),
                 android.R.layout.simple_spinner_item, arrayCategoria);
         adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -238,10 +242,10 @@ public class DialogFiltro extends DialogFragment {
                 actionsCreator.salvaNoSharedPreferences("categoriaPosSelecionada", String.valueOf(categoriaSelecionadaPosition));
 
                 if(categoriaSelecionadaPosition == 0) {
-                    actionsCreator.salvaNoSharedPreferences("categoriSelecionada",
+                    actionsCreator.salvaNoSharedPreferences("categoriaSelecionada",
                             null);
                 }else{
-                    actionsCreator.salvaNoSharedPreferences("categoriSelecionada",
+                    actionsCreator.salvaNoSharedPreferences("categoriaSelecionada",
                             spnCategoria.getAdapter().getItem(categoriaSelecionadaPosition).toString());
                 }
                 getDialog().dismiss();
@@ -288,7 +292,12 @@ public class DialogFiltro extends DialogFragment {
     public void onResume() {
         super.onResume();
         dispatcher.register(this);
-        dispatcher.register(userStore);
+        try {
+            dispatcher.register(userStore);
+        }catch (Exception e){
+
+        }
+
     }
 
     @Override

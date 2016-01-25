@@ -4,10 +4,12 @@ import com.gamfig.monitorabrasil.actions.Action;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Comparacao;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -54,11 +56,28 @@ public class PoliticoStore extends Store{
         return gastos;
     }
 
-    public  List<ParseObject> filtrar(String query){
+    public  List<ParseObject> filtrar(String query, boolean ranking){
         politicosFiltro.clear();
         for (int i = 0; i < politicos.size(); i++) {
-            if(politicos.get(i).getString("nome").toUpperCase().contains(query.toUpperCase()))
-                politicosFiltro.add(politicos.get(i));
+            if(ranking){
+                try {
+
+                    ParseObject p = politicos.get(i);
+                    p.fetchIfNeeded();
+                    if(p.getString("nome") == null){
+                        p = p.getParseObject("politico");
+                        p.fetchIfNeeded();
+                    }
+                    if(p.getString("nome").toUpperCase().contains(query.toUpperCase()))
+                        politicosFiltro.add(politicos.get(i));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                if(politicos.get(i).getString("nome").toUpperCase().contains(query.toUpperCase()))
+                    politicosFiltro.add(politicos.get(i));
+            }
+
 
         }
         return politicosFiltro;
@@ -70,6 +89,9 @@ public class PoliticoStore extends Store{
     public ParseObject getPolitico(){return politico;}
 
     public List<ParseObject> getPoliticos(){
+        for(int i=0; i < politicos.size();i++){
+            politicos.get(i).put("pos",String.valueOf((i+1)));
+        }
         return politicos;
     }
 

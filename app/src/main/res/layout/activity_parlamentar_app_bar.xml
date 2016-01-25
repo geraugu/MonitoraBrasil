@@ -20,6 +20,12 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior" android:id="@+id/frameLayout">
 
         <include layout="@layout/activity_parlamentar_list" />
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar2"
+            android:layout_gravity="center" />
     </FrameLayout>
 
 

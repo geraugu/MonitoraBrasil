@@ -18,6 +18,7 @@ import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.LogInCallback;
 import com.parse.LogOutCallback;
+import com.parse.Parse;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -32,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -665,7 +667,7 @@ public class ActionsCreator {
             }
         });
         getPartidos(true);
-        getCategoriasCotas(true);
+        getCategoriasCotas(null, true);
     }
 
     /**
@@ -705,6 +707,7 @@ public class ActionsCreator {
             if(null != getValorSharedPreferences("anoSelecionada")){
                 query.whereEqualTo("ano",Integer.valueOf(getValorSharedPreferences("anoSelecionada")));
             }
+            query.whereEqualTo("ano",2015);
             query.whereEqualTo("tpCota",getValorSharedPreferences("categoriaSelecionada"));
             query.whereMatchesQuery("politico", innerQuery);
             query.include("politico");
@@ -757,11 +760,10 @@ public class ActionsCreator {
 
     /**
      * Busca os gastos de um politico
-     * @param idCadastro cadastro do politico
+     * @param politico cadastro do politico
      */
-    public void getGastos(String idCadastro) {
-        ParseObject politico = getPolitico(idCadastro);
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("CotaPorCategoriaPercentual");
+    public void getGastos(ParseObject politico) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("CotaXCategoria");
         query.whereEqualTo("politico",politico);
         query.addDescendingOrder("total");
         query.setLimit(1000);
@@ -906,15 +908,17 @@ public class ActionsCreator {
             public void done(String jsonString, ParseException e) {
                 if (e == null) {
                     try {
-                        JSONObject json = new JSONObject(jsonString);
-                        Comparacao comparacao = new Comparacao();
-                        comparacao.setProduto(json.getString("produto"));
-                        comparacao.setValor((float) json.getDouble("conta"));
-                        comparacao.setCota(buscaCota(json.getString("id")));
-                        dispatcher.dispatch(
-                                PoliticoActions.POLITICO_GET_COMPARACAO_GASTO,
-                                PoliticoActions.KEY_TEXT,comparacao
-                        );
+                        if(jsonString != null) {
+                            JSONObject json = new JSONObject(jsonString);
+                            Comparacao comparacao = new Comparacao();
+                            comparacao.setProduto(json.getString("produto"));
+                            comparacao.setValor((float) json.getDouble("conta"));
+                            comparacao.setCota(buscaCota(json.getString("id")));
+                            dispatcher.dispatch(
+                                    PoliticoActions.POLITICO_GET_COMPARACAO_GASTO,
+                                    PoliticoActions.KEY_TEXT, comparacao
+                            );
+                        }
                     } catch (JSONException e1) {
                         e1.printStackTrace();
                     }
@@ -931,7 +935,7 @@ public class ActionsCreator {
     }
 
     private ParseObject buscaCota(String id) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("CotaPorCategoriaPercentual");
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("CotaXCategoria");
         try {
             ParseObject cota = query.get(id);
             return cota;
@@ -945,21 +949,24 @@ public class ActionsCreator {
     /**
      * Busca os projetos de um politico ou todos se o idPolitico = null
      *
-     * @param idPolitico id
-     * @param previousTotal paginacao
+     * @param politico
+     * @param casa
+     * @param previousTotal
      */
-    public void getAllProjetos(String idPolitico, String casa, int previousTotal) {
+    public void getAllProjetos(ParseObject politico, String casa, int previousTotal) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Proposicao");
         query.whereEqualTo("tp_casa",casa);
+        if(casa.equals("s"))
+            query.whereEqualTo("tramitando","Sim");
         query.addDescendingOrder("nr_ano");
         query.addDescendingOrder("tx_nome");
         query.setLimit(15);
         query.setSkip(previousTotal);
 
-        if(idPolitico!= null){
+        if(politico!= null){
 //            ParseObject politico = ParseObject.createWithoutData("Politico",idPolitico);
 //            query.whereEqualTo("politico", politico);
-            query.whereEqualTo("id_autor",idPolitico);
+            query.whereEqualTo("autor",politico);
         }
 
         query.findInBackground(new FindCallback<ParseObject>() {
@@ -989,13 +996,13 @@ public class ActionsCreator {
      * @param casa
      */
     public void buscaProjetoPorPalavra(String chave, String casa) {
-        chave =  "(?i).*"+chave+".*";
         ParseQuery<ParseObject> query1 = ParseQuery.getQuery("Proposicao");
-        query1.whereMatches("txt_ementa",chave);
-        query1.whereEqualTo("casa",casa);
+        query1.whereContainedIn("words", Arrays.asList(chave.toLowerCase()));
+ //       query1.whereEqualTo("casa",casa);
 
         ParseQuery<ParseObject> query2 = ParseQuery.getQuery("Proposicao");
-        query2.whereMatches("txt_nome", chave);
+        query2.whereStartsWith("tx_nome", chave.toUpperCase());
+//        query2.whereEqualTo("casa",casa);
 
 
         List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
@@ -1003,8 +1010,8 @@ public class ActionsCreator {
         queries.add(query2);
 
         ParseQuery<ParseObject> query = ParseQuery.or(queries);
-        query.addDescendingOrder("nr_ano");
-        query.addDescendingOrder("tx_nome");
+         query.addDescendingOrder("nr_ano");
+         //query.addDescendingOrder("tx_nome");
 
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -1060,9 +1067,11 @@ public class ActionsCreator {
      * Busca os categorias de cotas
      * @return lista de categorias na nuvem
      */
-    public List<String> getCategoriasCotas(boolean nuvem) {
+    public List<String> getCategoriasCotas(String casa, boolean nuvem) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Subcota");
+        if(casa != null)
+            query.whereEqualTo("casa",casa);
         if(!nuvem)
             query.fromLocalDatastore();
         query.addAscendingOrder("txt_descricao");
@@ -1113,7 +1122,8 @@ public class ActionsCreator {
                     if(e == null)
                         object.deleteInBackground();
                     try {
-                        object.unpin();
+                        if(object != null)
+                            object.unpin();
                     } catch (ParseException e1) {
                         e1.printStackTrace();
                     }

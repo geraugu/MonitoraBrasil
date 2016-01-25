@@ -1,18 +1,22 @@
 package com.gamfig.monitorabrasil.views.adapters;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
+import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.model.Imagens;
 import com.gamfig.monitorabrasil.util.MyValueFormatter;
+import com.gamfig.monitorabrasil.views.ParlamentarListActivity;
 import com.parse.ParseObject;
 
 import java.util.ArrayList;
@@ -29,12 +33,17 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
 
     private MyValueFormatter mFormat;
     private String tipo;//camara ou senado
+    private boolean ranking;
+    ParseObject mPolitico;
+    ParlamentarListActivity activity;
 
-    public PoliticoAdapter(ActionsCreator actionsCreator, String tipo) {
+    public PoliticoAdapter(ActionsCreator actionsCreator, String tipo, boolean ranking, ParlamentarListActivity parlamentarListActivity) {
         politicos = new ArrayList<>();
         PoliticoAdapter.actionsCreator = actionsCreator;
         this.tipo = tipo;
         mFormat = new MyValueFormatter();
+        this.ranking=ranking;
+        this.activity=parlamentarListActivity;
     }
 
     @Override
@@ -52,21 +61,25 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final ViewHolder viewHolder, final int i) {
 
         ParseObject politico = politicos.get(i);
         Number gasto;
-       // gasto = politico.getNumber("gastos");
+        if(ranking){
+            viewHolder.txtRank.setText(String.format("%sº",politico.getString("pos")));
+            viewHolder.txtRank.setVisibility(View.VISIBLE);
+        }else{
+            viewHolder.txtRank.setVisibility(View.GONE);
+        }
         if(politico.getParseObject("politico")!= null){
             gasto = politico.getNumber("total");
             politico = politico.getParseObject("politico");
-            viewHolder.txtRank.setText(String.format("%d",(i+1)));
-            viewHolder.txtRank.setVisibility(View.VISIBLE);
+
         }else{
             gasto = politico.getNumber("gastos");
-            viewHolder.txtRank.setVisibility(View.GONE);
+
         }
-      //  politico.pinInBackground();
+        //  politico.pinInBackground();
 
         viewHolder.mTextView.setText(politico.get("nome").toString());
         viewHolder.txtPartido.setText(String.format("%s-%s",politico.get("siglaPartido").toString(),politico.getString("uf")));
@@ -77,8 +90,8 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         if(politico.getString("twitter")!= null)
             if(politico.getString("twitter").length() > 0)
                 viewHolder.txtTwitter.setText(politico.getString("twitter"));
-        else
-            viewHolder.txtTwitter.setVisibility(View.GONE);
+            else
+                viewHolder.txtTwitter.setVisibility(View.GONE);
 
         if(politico.getNumber("gastos")==null)
             viewHolder.txtGastos.setText("Gastos: não disponível");
@@ -88,6 +101,48 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
 
         Imagens.getFotoPolitico(politico,viewHolder.foto);
         Imagens.getImagemPartido(politico.get("siglaPartido").toString(),viewHolder.imgPartido);
+
+        viewHolder.btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPolitico = politicos.get(i);
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                String pos="";
+                if(ranking)
+                    pos = String.format("%sº lugar: ",mPolitico.getString("pos"));
+
+                String gasto;
+                if(mPolitico.getNumber("gastos")==null)
+                    gasto = "não disponível";
+                else
+                    gasto = mFormat.formata(mPolitico.getNumber("gastos").floatValue()) ;
+
+                String nome=mPolitico.getString("nome");
+                if(mPolitico.getString("twitter")!= null)
+                    if(mPolitico.getString("twitter").length() > 0)
+                        nome = mPolitico.getString("twitter");
+
+                String avaliacao="";
+                if(mPolitico.getNumber("mediaAvaliacao")!= null){
+                    avaliacao =String.format("Avaliação: %s",mFormat.formata(mPolitico.getNumber("mediaAvaliacao").floatValue()));
+                }
+
+                String faltas="";
+                if(mPolitico.getNumber("faltas")!= null){
+                    faltas =String.format("Faltas: %d",mPolitico.getNumber("faltas").intValue());
+                }
+                String shareBody= String.format("%s%s(%s-%s) Gastos: R$ %s %s %s #monitoraBrasil",
+                        pos,nome,mPolitico.getString("siglaPartido"),mPolitico.getString("uf"),
+                        gasto,faltas,avaliacao );
+
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, AppController.getInstance().getString(R.string.app_name));
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
+                sharingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(Intent.createChooser(sharingIntent, "Compartilhar via"));
+            }
+        });
+
 
     }
 
@@ -114,6 +169,7 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
         public TextView txtRank;
         public ImageView foto;
         public ImageView imgPartido;
+        public ImageButton btnShare;
         public RatingBar rb;
         public ViewHolder(View v) {
             super(v);
@@ -126,6 +182,7 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
             foto  = (ImageView)v.findViewById(R.id.foto);
             imgPartido  = (ImageView)v.findViewById(R.id.imgPartido);
             rb = (RatingBar)v.findViewById(R.id.ratingBar);
+            btnShare = (ImageButton)v.findViewById(R.id.btnShare);
 
             itemView.setOnClickListener(this);
         }

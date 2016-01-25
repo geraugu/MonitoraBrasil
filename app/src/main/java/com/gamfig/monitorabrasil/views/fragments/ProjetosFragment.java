@@ -14,6 +14,7 @@ import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.stores.ProjetoStore;
 import com.gamfig.monitorabrasil.views.adapters.ProjetoAdapter;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -73,12 +74,19 @@ public class ProjetosFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_gastos, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_projetos, container, false);
         initDependencies();
         //busca as informacoes do politico
-        politico = actionsCreator.getPolitico(idPolitico);
-        setupView(rootView);
-        actionsCreator.getAllProjetos(politico.getString("idCadastro"),politico.getString("tipo"),0);
+        politico = ParseObject.createWithoutData("Politico",idPolitico);
+        try {
+            politico.fetchFromLocalDatastore();
+            setupView(rootView);
+            projetoStore.limpaProjetos();
+            actionsCreator.getAllProjetos(politico,politico.getString("tipo"),0);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
 
         return rootView;
     }
@@ -92,7 +100,7 @@ public class ProjetosFragment extends Fragment {
     private void setupView(View rootView) {
 
         //tableview
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.my_recycler_view);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.rec_projetos);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -122,7 +130,7 @@ public class ProjetosFragment extends Fragment {
                 if (!loading && (totalItemCount - visibleItemCount)
                         <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
                     //carregar mais projetos
-                    actionsCreator.getAllProjetos(politico.getString("idCadastro"),politico.getString("tipo"), previousTotal);
+                    actionsCreator.getAllProjetos(politico,politico.getString("tipo"), previousTotal);
 
                     loading = true;
                 }

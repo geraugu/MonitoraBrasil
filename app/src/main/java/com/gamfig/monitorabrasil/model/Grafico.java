@@ -133,7 +133,7 @@ public class Grafico {
 
 
         for (int i = 0; i < gastos.size(); i++)
-            xVals.add(gastos.get(i).getString("categoria"));
+            xVals.add(gastos.get(i).getString("tpCota"));
 
 
         PieDataSet dataSet = new PieDataSet(yVals1, "Gastos");

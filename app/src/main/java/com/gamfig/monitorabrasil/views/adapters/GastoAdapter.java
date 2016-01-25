@@ -53,7 +53,7 @@ public class GastoAdapter extends RecyclerView.Adapter<GastoAdapter.ViewHolder> 
     public void onBindViewHolder(final ViewHolder viewHolder, int i) {
         ParseObject gasto = mDataset.get(i);
 
-        viewHolder.categoria.setText(gasto.getString("categoria"));
+        viewHolder.categoria.setText(gasto.getString("tpCota"));
         viewHolder.valor.setText("R$ "+
                             formatter.formata(gasto.getNumber("total").floatValue()));
 

@@ -36,6 +36,7 @@ import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Tema;
 import com.gamfig.monitorabrasil.stores.DialogaStore;
+import com.gamfig.monitorabrasil.views.LoginActivity;
 import com.gamfig.monitorabrasil.views.adapters.ResultadoAdapter;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -233,7 +234,7 @@ public class DialogaVotoFragment extends Fragment {
 
         btnInsereResposta.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 //TODO mostrar a caixa para inserir a resposta
                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                 alert.setTitle("Opine");
@@ -254,8 +255,16 @@ public class DialogaVotoFragment extends Fragment {
                                         .setAction("Action", null).show();
                             }
                         }else{
-                            Snackbar.make(getView(),AppController.getInstance().getString(R.string.precisa_logar_para_votar), Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
+                            Snackbar.make(view, "Para votar é necessário estar logado", Snackbar.LENGTH_LONG)
+                                    .setAction("Logar", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            AppController.getInstance().startActivity(intent);
+                                        }
+                                    }).show();
+
                         }
 
                     }
@@ -275,27 +284,29 @@ public class DialogaVotoFragment extends Fragment {
             public void onClick(View view) {
                 //TODO mostrar a proxima resposta se houver
                 //verificar se eh a ultima resposta
-                int qtdRespostas = respostas.size();
-                int posicaoRespAtual = respostas.lastIndexOf(respostaAtual);
-                if( posicaoRespAtual == (qtdRespostas-1)){
-                    btnProxima.setVisibility(View.GONE);
-                    btnInsereResposta.setVisibility(View.VISIBLE);
-                    btnDiscordo.setVisibility(View.GONE);
-                    btnConcordo.setVisibility(View.GONE);
-                    txtResposta.setText(AppController.getInstance().getString(R.string.nao_ha_opnioes));
-                }else{
-                    respostaAtual = respostas.get(posicaoRespAtual+1);
-                    txtResposta.setText(respostaAtual.getString("texto"));
-                    btnConcordo.setBackground(imgapoio);
-                    btnDiscordo.setBackground(imgnapoio);
-                    //verifica se ja tem voto
-                    ParseObject voto = actionsCreator.getVoto(respostaAtual);
+                if(respostas != null) {
+                    int qtdRespostas = respostas.size();
+                    int posicaoRespAtual = respostas.lastIndexOf(respostaAtual);
+                    if (posicaoRespAtual == (qtdRespostas - 1)) {
+                        btnProxima.setVisibility(View.GONE);
+                        btnInsereResposta.setVisibility(View.VISIBLE);
+                        btnDiscordo.setVisibility(View.GONE);
+                        btnConcordo.setVisibility(View.GONE);
+                        txtResposta.setText(AppController.getInstance().getString(R.string.nao_ha_opnioes));
+                    } else {
+                        respostaAtual = respostas.get(posicaoRespAtual + 1);
+                        txtResposta.setText(respostaAtual.getString("texto"));
+                        btnConcordo.setBackground(imgapoio);
+                        btnDiscordo.setBackground(imgnapoio);
+                        //verifica se ja tem voto
+                        ParseObject voto = actionsCreator.getVoto(respostaAtual);
 
-                    if(null != voto){
-                        if(voto.getString("sim_nao").equals("s")){
-                            btnConcordo.setBackground(apoioVerde);
-                        }else{
-                            btnDiscordo.setBackground(napoioVermelho);
+                        if (null != voto) {
+                            if (voto.getString("sim_nao").equals("s")) {
+                                btnConcordo.setBackground(apoioVerde);
+                            } else {
+                                btnDiscordo.setBackground(napoioVermelho);
+                            }
                         }
                     }
                 }
@@ -333,8 +344,15 @@ public class DialogaVotoFragment extends Fragment {
 
 
                 }else{
-                    Snackbar.make(getView(), AppController.getInstance().getString(R.string.precisa_logar_para_votar), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Snackbar.make(view, "Para votar é necessário estar logado", Snackbar.LENGTH_LONG)
+                            .setAction("Logar", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    AppController.getInstance().startActivity(intent);
+                                }
+                            }).show();
                 }
 
             }
@@ -358,8 +376,15 @@ public class DialogaVotoFragment extends Fragment {
                     btnDiscordo.setBackground(napoioVermelho);
 
                 }else{
-                    Snackbar.make(getView(), AppController.getInstance().getString(R.string.precisa_logar_para_votar), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Snackbar.make(view, "Para votar é necessário estar logado", Snackbar.LENGTH_LONG)
+                            .setAction("Logar", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    AppController.getInstance().startActivity(intent);
+                                }
+                            }).show();
                 }
 
             }
@@ -371,9 +396,16 @@ public class DialogaVotoFragment extends Fragment {
             public void onClick(View view) {
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("text/plain");
-                String shareBody = "Recomendo o app "+AppController.getInstance().getString(R.string.app_name)
-                        +" https://play.google.com/store/apps/details?id=com.monitorabrasil.participacidadao";
+                String shareBody;
+                if(pergunta != null){
+                    shareBody = pergunta.getString("texto")
+                            +" https://play.google.com/store/apps/details?id=com.monitorabrasil.participacidadao #monitorabrasil";
+                }else {
+                    shareBody = "Recomendo o app " + AppController.getInstance().getString(R.string.app_name)
+                            + " https://play.google.com/store/apps/details?id=com.monitorabrasil.participacidadao";
+                }
                 sharingIntent.putExtra(Intent.EXTRA_SUBJECT, AppController.getInstance().getString(R.string.app_name));
+                sharingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
                 startActivity(Intent.createChooser(sharingIntent, "Compartilhar via"));
 

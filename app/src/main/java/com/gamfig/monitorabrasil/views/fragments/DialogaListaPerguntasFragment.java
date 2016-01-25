@@ -1,6 +1,7 @@
 package com.gamfig.monitorabrasil.views.fragments;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.model.Tema;
 import com.gamfig.monitorabrasil.stores.DialogaStore;
+import com.gamfig.monitorabrasil.views.LoginActivity;
 import com.gamfig.monitorabrasil.views.adapters.PerguntaAdapter;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -165,7 +167,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                 alert.setTitle("Pergunta");
                 alert.setMessage(AppController.getInstance().getString(R.string.qual_pergunta));
@@ -187,8 +189,14 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
                                         .setAction("Action", null).show();
                             }
                         } else {
-                            Snackbar.make(getView(), AppController.getInstance().getString(R.string.faca_login), Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
+                            Snackbar.make(view, "Para votar é necessário estar logado", Snackbar.LENGTH_LONG)
+                                    .setAction("Logar", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                            AppController.getInstance().startActivity(intent);
+                                        }
+                                    }).show();
                         }
 
                     }

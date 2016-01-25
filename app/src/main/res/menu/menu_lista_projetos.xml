@@ -9,6 +9,7 @@
     android:title="@string/procurar"/>
     <item
         android:id="@+id/action_filter"
+        android:visible="false"
         android:icon="@android:drawable/ic_menu_sort_by_size"
         app:showAsAction="always"
         android:title="@string/filtrar"/>

@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
@@ -57,6 +58,7 @@ public class ProjetoListActivity extends AppCompatActivity
     private ProjetoStore projetoStore;
     private RecyclerView mRecyclerView;
     private ProjetoAdapter mAdapter;
+    private ProgressBar pb;
 
     private String casa;
 
@@ -121,7 +123,7 @@ public class ProjetoListActivity extends AppCompatActivity
                     .findFragmentById(R.id.parlamentar_list))
                     .setActivateOnItemClick(true);
         }
-
+        projetoStore.limpaProjetos();
         actionsCreator.getAllProjetos(null,casa, 0);
 
     }
@@ -136,6 +138,7 @@ public class ProjetoListActivity extends AppCompatActivity
 
     private void setupView() {
 
+        pb = (ProgressBar)findViewById(R.id.progressBar2);
         //tableview
         mRecyclerView = (RecyclerView) findViewById(R.id.parlamentar_list);
 
@@ -190,7 +193,7 @@ public class ProjetoListActivity extends AppCompatActivity
         int id = item.getItemId();
         if(id == R.id.action_filter){
             //abrir o dialog para filtrar
-            DialogFiltro filtro = DialogFiltro.newInstance("Escolha um filtro","projeto");
+            DialogFiltro filtro = DialogFiltro.newInstance("Escolha um filtro","projeto","");
             filtro.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
@@ -267,6 +270,7 @@ public class ProjetoListActivity extends AppCompatActivity
 
     private void updateUI() {
         mAdapter.setItems(projetoStore.getProjetos());
+        pb.setVisibility(View.GONE);
     }
 
     /**
@@ -300,8 +304,10 @@ public class ProjetoListActivity extends AppCompatActivity
                 public boolean onQueryTextSubmit(String query) {
                     if (!query.isEmpty()) {
                         //realizar a busca
+
+                        pb.setVisibility(View.VISIBLE);
                         projetoStore.limpaProjetos();
-                        actionsCreator.buscaProjetoPorPalavra(query,casa);
+                        actionsCreator.buscaProjetoPorPalavra(query.trim(),casa);
                         realizouBusca = true;
                     }
 

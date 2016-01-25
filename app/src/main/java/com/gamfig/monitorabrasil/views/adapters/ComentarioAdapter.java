@@ -57,8 +57,8 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, int i) {
         ParseObject comentario = mDataset.get(i);
-
-        viewHolder.txtUser.setText(comentario.get("nome").toString());
+        if(comentario.getString( "nome")!= null)
+            viewHolder.txtUser.setText(comentario.getString("nome"));
         viewHolder.txtComentario.setText(comentario.get("tx_comentario").toString());
 
         //calcula o horario da mensagem
@@ -69,17 +69,19 @@ public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.Vi
 
         //busca a imagem do usuario
         ParseUser user = comentario.getParseUser("user");
-        ParseFile foto = user.getParseFile("foto");
-        if(foto != null)
-            foto.getDataInBackground(new GetDataCallback() {
-                public void done(byte[] data, ParseException e) {
-                    if (e == null) {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        bitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, true);
-                        viewHolder.imgUser.setImageBitmap(bitmap);
+        if(user != null) {
+            ParseFile foto = user.getParseFile("foto");
+            if (foto != null)
+                foto.getDataInBackground(new GetDataCallback() {
+                    public void done(byte[] data, ParseException e) {
+                        if (e == null) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, true);
+                            viewHolder.imgUser.setImageBitmap(bitmap);
+                        }
                     }
-                }
-            });
+                });
+        }
     }
 
     @Override

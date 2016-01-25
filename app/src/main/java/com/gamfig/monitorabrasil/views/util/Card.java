@@ -32,7 +32,7 @@ public class Card {
         else
             tipo = "Sen.";
         nomePolitico.setText(String.format("%s %s",tipo,politico.getString("nome")));
-        categoria.setText(comparacao.getCota().getString("categoria"));
+        categoria.setText(comparacao.getCota().getString("tpCota"));
 
         MyValueFormatter formatter = new MyValueFormatter();
         total.setText("R$ "+formatter.formata(comparacao.getCota().getNumber("total").floatValue()));

@@ -16,6 +16,7 @@ import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.views.ComentarioActivity;
+import com.gamfig.monitorabrasil.views.LoginActivity;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -68,6 +69,25 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         viewHolder.voto = "sem_voto";
         final ParseObject projeto = projetos.get(i);
         viewHolder.projeto = projeto;
+
+        //autor
+        String autor="";
+        if(projeto.getString("nome_autor")!= null){
+            autor = projeto.getString("nome_autor");
+        }else{
+            ParseObject mAutor = projeto.getParseObject("autor");
+            if(mAutor!=null) {
+                try {
+                    mAutor.fetchFromLocalDatastore();
+                    autor = mAutor.getString("nome");
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        viewHolder.autor.setText(autor);
+
         //verifica se ja votou
         ParseQuery<ParseObject> query = ParseQuery.getQuery("VotoProposicao");
         query.fromLocalDatastore();
@@ -94,10 +114,14 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         });
 
         viewHolder.numero.setText(projeto.getString("tx_nome"));
-       // viewHolder.autor.setText(projeto.getParseObject(""));
+        // viewHolder.autor.setText(projeto.getParseObject(""));
 
-        if(projeto.get("dt_apresentacao")!= null)
-            viewHolder.data.setText(projeto.get("dt_apresentacao").toString());
+        if(projeto.get("dt_apresentacao")!= null) {
+            String data = projeto.getString("dt_apresentacao");
+            String[] temp = data.split("-");
+            data = String.format("%s-%s-%s",temp[2],temp[1],temp[0]);
+            viewHolder.data.setText(data);
+        }
 
         viewHolder.descricao.setText(projeto.get("txt_ementa").toString());
         int numComentario = 0;
@@ -163,7 +187,16 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         //verificar se esta logado
         if(ParseUser.getCurrentUser() == null){
             Snackbar.make(v, "Para votar é necessário estar logado", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+                    .setAction("Logar", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            AppController.getInstance().startActivity(intent);
+                        }
+                    }).show();
             return;
         }
 

@@ -40,7 +40,8 @@
 
             <!-- CARD PROJETO RECENTE -->
 
-            <!-- CARD ULTIMA INTERACAO NO APP -->
+            <!-- CARD ULTIMA INTERACAO NO APP
+            <include layout="@layout/card_comentario" />-->
 
             <!-- CARD RANKING USUARIO -->
 

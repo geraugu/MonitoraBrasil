@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -120,6 +121,10 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         mRatingBar = (RatingBar)rootView.findViewById(R.id.ratingBar2);
         //tableview
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view_presenca);
+        if(politico.getString("tipo").equals("s")) {
+            CardView cvPresenca = (CardView) rootView.findViewById(R.id.cardPresenca);
+            cvPresenca.setVisibility(View.GONE);
+        }
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView

@@ -1,6 +1,7 @@
 package com.gamfig.monitorabrasil.views;
 
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -20,9 +21,11 @@ import android.widget.ProgressBar;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.ComentarioActions;
+import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.stores.ComentarioStore;
 import com.gamfig.monitorabrasil.views.adapters.ComentarioAdapter;
+import com.parse.ParseUser;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -120,11 +123,22 @@ public class ComentarioActivity extends AppCompatActivity {
     private void enviarMensagem(final View v) {
         final EditText txtMensagem = (EditText)findViewById(R.id.mensagem);
         String mensagem = txtMensagem.getText().toString();
-        if(mensagem.isEmpty()){
-            Snackbar.make(v,getString(R.string.qual_e_mensagem), Snackbar.LENGTH_LONG).show();
+        if(ParseUser.getCurrentUser()!=null) {
+            if (mensagem.isEmpty()) {
+                Snackbar.make(v, getString(R.string.qual_e_mensagem), Snackbar.LENGTH_LONG).show();
+            } else {
+                actionsCreator.enviarMensagem(mensagem, tipo, idObjeto);
+                txtMensagem.setText("");
+            }
         }else{
-            actionsCreator.enviarMensagem(mensagem,tipo,idObjeto);
-            txtMensagem.setText("");
+            Snackbar.make(v, getString(R.string.precisa_logar), Snackbar.LENGTH_LONG)
+                    .setAction("Logar", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                            startActivity(intent);
+                        }
+                    }).show();
         }
 
     }

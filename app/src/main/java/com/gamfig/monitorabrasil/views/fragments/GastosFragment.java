@@ -91,7 +91,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
         //busca as informacoes do politico
         politico = actionsCreator.getPolitico(idPolitico);
         setupView(rootView);
-        actionsCreator.getGastos(idPolitico);
+        actionsCreator.getGastos(politico);
 
         return rootView;
     }

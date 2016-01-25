@@ -385,33 +385,38 @@ public class LoginActivity extends AppCompatActivity {
             public void done(ParseException e) {
                 // If successful add file to user and signUpInBackground
                 if (e == null) {
-                    if(mParseFile!= null)
-                        currentUser.put("foto", mParseFile);
-                    currentUser.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            currentUser.setEmail(mEmailView.getText().toString());
-                            currentUser.put("nome", mNome.getText().toString());
-                            currentUser.saveInBackground(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    showProgress(false);
-                                    if (null == e) {
-                                        Answers.getInstance().logCustom(new CustomEvent("Cadastro atualizado"));
-                                        Toast.makeText(LoginActivity.this, getString(R.string.cadastro_atualizado), Toast.LENGTH_LONG).show();
-                                    } else {
-                                        try {
-                                            currentUser.fetch();
-                                            mEmailView.setText(currentUser.getEmail());
-                                        } catch (ParseException e1) {
-                                            e1.printStackTrace();
+                    if(currentUser==null){
+                        currentUser = ParseUser.getCurrentUser();
+                    }
+                    if(currentUser != null) {
+                        if (mParseFile != null)
+                            currentUser.put("foto", mParseFile);
+                        currentUser.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                currentUser.setEmail(mEmailView.getText().toString());
+                                currentUser.put("nome", mNome.getText().toString());
+                                currentUser.saveInBackground(new SaveCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        showProgress(false);
+                                        if (null == e) {
+                                            Answers.getInstance().logCustom(new CustomEvent("Cadastro atualizado"));
+                                            Toast.makeText(LoginActivity.this, getString(R.string.cadastro_atualizado), Toast.LENGTH_LONG).show();
+                                        } else {
+                                            try {
+                                                currentUser.fetch();
+                                                mEmailView.setText(currentUser.getEmail());
+                                            } catch (ParseException e1) {
+                                                e1.printStackTrace();
+                                            }
+                                            Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                                         }
-                                        Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                                     }
-                                }
-                            });
-                        }
-                    });
+                                });
+                            }
+                        });
+                    }
                 } else {
                     Toast.makeText(LoginActivity.this,e.getMessage(), Toast.LENGTH_LONG).show();
                 }

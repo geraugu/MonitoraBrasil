@@ -26,8 +26,8 @@ android {
         applicationId "com.gamfig.monitorabrasil"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 59
-        versionName "4.0.2"
+        versionCode 62
+        versionName "4.0.7"
     }
     buildTypes {
         release {
@@ -43,7 +43,7 @@ dependencies {
 
 
 
-    compile('com.twitter.sdk.android:twitter:1.11.0@aar') {
+    compile('com.twitter.sdk.android:twitter:1.12.0@aar') {
         transitive = true;
     }
     compile('com.twitter.sdk.android:tweet-ui:1.0.5@aar') {

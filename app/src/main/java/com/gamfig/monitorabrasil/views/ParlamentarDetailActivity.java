@@ -29,6 +29,7 @@ import com.gamfig.monitorabrasil.views.fragments.ProjetosFragment;
 import com.gamfig.monitorabrasil.views.fragments.TwitterFragment;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 import com.squareup.otto.Bus;
 
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
     private Dispatcher dispatcher;
     private ActionsCreator actionsCreator;
     private PoliticoStore politicoStore;
+    private boolean estaMonitorando;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -111,38 +113,50 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
             }
         });
 
-        final boolean estaMonitorando = actionsCreator.estaMonitorando(politico);
+        estaMonitorando = actionsCreator.estaMonitorando(politico);
         final FloatingActionButton fabMonitorar = (FloatingActionButton) findViewById(R.id.fabMonitorar);
         fabMonitorar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(ParseUser.getCurrentUser()!=null) {
+                    Answers.getInstance().logCustom(new CustomEvent("TouchMonitorar")
+                            .putCustomAttribute("acao", String.valueOf(estaMonitorando))
+                            .putCustomAttribute("politico", politico.getString("nome")));
+                    estaMonitorando = !estaMonitorando;
 
-                Answers.getInstance().logCustom(new CustomEvent("TouchMonitorar")
-                        .putCustomAttribute("acao", String.valueOf(estaMonitorando))
-                        .putCustomAttribute("politico", politico.getString("nome")));
+                    if (estaMonitorando) {
+                        fabMonitorar.setImageResource(android.R.drawable.star_big_on);
+                        Snackbar.make(view, "Agora vc está monitorando", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    } else {
+                        fabMonitorar.setImageResource(android.R.drawable.star_big_off);
+                        Snackbar.make(view, "Retirado de sua lista de monitoramento", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
 
-                if(estaMonitorando){
-                    fabMonitorar.setBackgroundResource(android.R.drawable.star_big_off);
-                    Snackbar.make(view, "Agora vc está monitorando", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    }
+                    try {
+                        actionsCreator.salvaUsuarioPolitico(politico, estaMonitorando);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }else{
-                    fabMonitorar.setBackgroundResource(android.R.drawable.star_big_on);
-                    Snackbar.make(view, "Retirado de sua lista de monitoramento", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-                try {
-                    actionsCreator.salvaUsuarioPolitico(politico,estaMonitorando);
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                    Snackbar.make(view, getString(R.string.precisa_logar), Snackbar.LENGTH_LONG)
+                            .setAction("Logar", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                    startActivity(intent);
+                                }
+                            }).show();
                 }
 
             }
         });
 
         if(estaMonitorando){
-            fabMonitorar.setBackgroundResource(android.R.drawable.star_big_on);
+            fabMonitorar.setImageResource(android.R.drawable.star_big_on);
         }else{
-            fabMonitorar.setBackgroundResource(android.R.drawable.star_big_off);
+            fabMonitorar.setImageResource(android.R.drawable.star_big_off);
         }
 
 
@@ -190,6 +204,7 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         adapter.addFrag(fragment, "Gastos");
 
         //TWITTER
+
         if(null != politico.getString("twitter")) {
             if(politico.getString("twitter").length() > 0) {
                 TwitterFragment fragmentTwitter = TwitterFragment.newInstance(politico.getString("twitter"), null);
