@@ -186,6 +186,29 @@ public class ActionsCreator {
         });
     }
 
+    public void getUltimoComentarioPolitico(String id){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("ComentarioPolitico");
+        if(id != null){
+            ParseObject politico = ParseObject.createWithoutData("Politico",id);
+            query.whereEqualTo("politico",politico);
+        }
+        query.addDescendingOrder("createdAt");
+        query.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    dispatcher.dispatch(
+                            ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO,
+                            ComentarioActions.KEY_TEXT, object);
+                } else {
+                    dispatcher.dispatch(
+                            ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO,
+                            ComentarioActions.KEY_TEXT, "erro");
+                }
+            }
+        });
+    }
+
     public void enviarMensagem (String mensagem, String tipo, String idObject){
         ParseUser user = ParseUser.getCurrentUser();
         if(user!= null){

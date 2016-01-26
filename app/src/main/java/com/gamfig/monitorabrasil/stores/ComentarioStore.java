@@ -56,6 +56,10 @@ public class ComentarioStore extends Store{
                 comentarios = ((List<ParseObject>) action.getData().get(ComentarioActions.KEY_TEXT));
                 emitStoreChange();
                 break;
+            case ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO:
+                comentario = ((ParseObject) action.getData().get(ComentarioActions.KEY_TEXT));
+                emitStoreChange();
+                break;
             case ComentarioActions.COMENTARIO_ENVIAR:
                 emitStoreChange();
                 break;

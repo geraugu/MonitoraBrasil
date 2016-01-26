@@ -11,4 +11,5 @@ public interface ComentarioActions {
     String KEY_ID = "key-id";
 
 
+    String COMENTARIO_POLITICO_GET_ULTIMO = "comentario_politico_get_ultimo";
 }

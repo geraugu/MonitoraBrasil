@@ -1,5 +1,7 @@
 package com.gamfig.monitorabrasil.views.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,7 +12,15 @@ import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Imagens;
 import com.gamfig.monitorabrasil.util.MyValueFormatter;
+import com.parse.GetDataCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by Geraldo on 07/01/2016.
@@ -44,6 +54,45 @@ public class Card {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 imgComparacao.setBackground(AppController.getInstance().getDrawable(getImage(comparacao.getProduto())));
             }
+        }
+    }
+
+    public void montaCardComentario(View v,ParseObject comentario){
+        TextView txtUser = (TextView) v.findViewById(R.id.txtUser);
+        TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
+        TextView txtHorario = (TextView) v.findViewById(R.id.txtHorario);
+        final ImageView imgUser = (ImageView) v.findViewById(R.id.imgUser);
+        txtUser.setText(comentario.getString("nome"));
+        txtComentario.setText(comentario.get("tx_comentario").toString());
+
+        Calendar cal = Calendar.getInstance();
+
+        //calcula o horario da mensagem
+        Date data = comentario.getCreatedAt();
+        cal.setTime(data);
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd/MM/yy HH:mm");
+        txtHorario.setText(dt1.format(cal.getTime()));
+
+        //busca a imagem do usuario
+        ParseUser user = comentario.getParseUser("user");
+        try {
+            user.fetchIfNeeded();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if(user != null) {
+            ParseFile foto = user.getParseFile("foto");
+            if (foto != null)
+                foto.getDataInBackground(new GetDataCallback() {
+                    public void done(byte[] data, ParseException e) {
+                        if (e == null) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, true);
+                            imgUser.setImageBitmap(bitmap);
+                        }
+                    }
+                });
         }
     }
 

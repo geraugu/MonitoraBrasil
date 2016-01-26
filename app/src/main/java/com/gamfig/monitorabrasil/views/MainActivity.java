@@ -27,13 +27,16 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
+import com.gamfig.monitorabrasil.actions.ComentarioActions;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
+import com.gamfig.monitorabrasil.model.Comentario;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Pergunta;
 import com.gamfig.monitorabrasil.model.Tema;
+import com.gamfig.monitorabrasil.stores.ComentarioStore;
 import com.gamfig.monitorabrasil.stores.DialogaStore;
 import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.dialogs.DialogGostou;
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     private ActionsCreator actionsCreator;
     private DialogaStore dialogaStore;
     private PoliticoStore politicoStore;
+    private ComentarioStore comentarioStore;
     private NestedScrollView mNestedScroll;
 
     private ProgressBar pbDialoga;
@@ -67,6 +71,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationView navigationView;
 
     private View viewCardComparaGasto;
+    private View viewCardComentarioPolitico;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +149,9 @@ public class MainActivity extends AppCompatActivity
         //tweet search #monitoraBrasil
         buscaTweet();
 
+        //busca ultimo comentario politico
+        actionsCreator.getUltimoComentarioPolitico(null);
+
         //setup headerview
         if(ParseUser.getCurrentUser()!=null)
             setupHeader();
@@ -191,13 +199,15 @@ public class MainActivity extends AppCompatActivity
         actionsCreator = ActionsCreator.get(dispatcher);
         dialogaStore = DialogaStore.get(dispatcher);
         politicoStore = PoliticoStore.get(dispatcher);
+        comentarioStore = ComentarioStore.get(dispatcher);
     }
 
     private void setupView() {
 
         mNestedScroll = (NestedScrollView)findViewById(R.id.nested);
         pbDialoga = (ProgressBar) findViewById(R.id.pbDialoga);
-        viewCardComparaGasto = (View) findViewById(R.id.llCardComparaGastos);
+        viewCardComparaGasto =  findViewById(R.id.llCardComparaGastos);
+        viewCardComentarioPolitico = findViewById(R.id.llCardComentario);
     }
 
     private void buscaTweet() {
@@ -266,12 +276,44 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Subscribe
+    public void onTodoStoreChange(ComentarioStore.ComentarioStoreChangeEvent event) {
+        switch (comentarioStore.getEvento()){
+            case ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO:
+                updateCardComentarioPolitico();
+                break;
+        }
+    }
+
+    private void updateCardComentarioPolitico() {
+        ParseObject comentario = comentarioStore.getComentario();
+        final ParseObject politico =  comentario.getParseObject("politico");
+        try {
+            politico.fetchFromLocalDatastore();
+            new Card().montaCardComentario(viewCardComentarioPolitico,comentario);
+            viewCardComentarioPolitico.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
+                    intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
+                    startActivity(intent);
+                }
+            });
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         dispatcher.register(this);
         dispatcher.register(dialogaStore);
         dispatcher.register(politicoStore);
+        dispatcher.register(comentarioStore);
+        if(ParseUser.getCurrentUser()!=null)
+            setupHeader();
     }
 
     @Override
@@ -280,6 +322,7 @@ public class MainActivity extends AppCompatActivity
         dispatcher.unregister(this);
         dispatcher.unregister(dialogaStore);
         dispatcher.unregister(politicoStore);
+        dispatcher.unregister(comentarioStore);
     }
 
 
