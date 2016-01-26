@@ -1,5 +1,145 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:id="@+id/projeto_detail"
-    style="?android:attr/textAppearanceLarge" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:padding="16dp" android:textIsSelectable="true"
-    tools:context="com.gamfig.monitorabrasil.views.ProjetoDetailFragment" />
+ android:layout_width="match_parent"
+    android:layout_height="match_parent" android:padding="16dp"
+    android:orientation="vertical"
+    tools:context="com.gamfig.monitorabrasil.views.ProjetoDetailFragment" >
+
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Data de Apresentação"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="01/01/2015"
+                android:id="@+id/txtDtApresentacao"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/black" />
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Autor"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fulano"
+                android:id="@+id/txtAutor"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/black" />
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Situação"
+                android:textStyle="bold" />
+
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fulano"
+                android:id="@+id/txtSituacao"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/black" />
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Data do último despacho"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="01/01/2015"
+                android:id="@+id/txtdtUltimoDespacho"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/black" />
+        </TableRow>
+    </TableLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Último Despacho"
+                android:textStyle="bold" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fulano"
+                android:id="@+id/txtUltimoDespacho"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/black" />
+
+
+    <View style="@style/Divider"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ementa"
+        android:textStyle="bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="fa sdfdaslç ldkjafs adjs façl "
+        android:id="@+id/txtEmenta"
+        android:layout_marginLeft="10dp"
+        android:textColor="@android:color/black" />
+    <View style="@style/Divider"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Explicação da Ementa"
+        android:textStyle="bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="fa sdfdaslç ldkjafs adjs façl "
+        android:id="@+id/txtExplicacao"
+        android:layout_marginLeft="10dp"
+        android:textColor="@android:color/black" />
+    <View style="@style/Divider"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Link para inteiro teor"
+        android:textStyle="bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="fa sdfdaslç ldkjafs adjs façl "
+        android:id="@+id/link"
+        android:layout_marginLeft="10dp"
+        android:autoLink="web"
+        android:textColor="@color/coloLink" />
+</LinearLayout>

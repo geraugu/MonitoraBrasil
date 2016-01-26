@@ -1,14 +1,13 @@
 package com.gamfig.monitorabrasil.views;
 
-import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.gamfig.monitorabrasil.R;
 
@@ -34,8 +33,7 @@ public class ProjetoDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                
             }
         });
 
@@ -57,6 +55,8 @@ public class ProjetoDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putString(ProjetoDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(ProjetoDetailFragment.ARG_ITEM_ID));
+            arguments.putString(ProjetoDetailFragment.ARG_CASA,
+                    getIntent().getStringExtra(ProjetoDetailFragment.ARG_CASA));
             ProjetoDetailFragment fragment = new ProjetoDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()

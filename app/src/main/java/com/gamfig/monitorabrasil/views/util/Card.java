@@ -61,9 +61,21 @@ public class Card {
         TextView txtUser = (TextView) v.findViewById(R.id.txtUser);
         TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
         TextView txtHorario = (TextView) v.findViewById(R.id.txtHorario);
+        TextView txtPolitico =(TextView)v.findViewById(R.id.txtPolitico);
         final ImageView imgUser = (ImageView) v.findViewById(R.id.imgUser);
         txtUser.setText(comentario.getString("nome"));
         txtComentario.setText(comentario.get("tx_comentario").toString());
+
+        ParseObject politico = comentario.getParseObject("politico");
+        try {
+            politico.fetchFromLocalDatastore();
+            txtPolitico.setText(String.format("%s %s",
+                    (politico.getString("tipo").equals("c")?"Dep.":"Sen."),
+                    politico.getString("nome")));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
 
         Calendar cal = Calendar.getInstance();
 

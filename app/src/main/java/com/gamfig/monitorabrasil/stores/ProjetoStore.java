@@ -4,6 +4,7 @@ package com.gamfig.monitorabrasil.stores;
 import com.gamfig.monitorabrasil.actions.Action;
 import com.gamfig.monitorabrasil.actions.ProjetoActions;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
+import com.gamfig.monitorabrasil.model.Projeto;
 import com.parse.ParseObject;
 import com.squareup.otto.Subscribe;
 
@@ -25,6 +26,16 @@ public class ProjetoStore extends Store{
     private String evento;
     private List<ParseObject> projetos;
     private ParseObject projeto;
+
+    public Projeto getmProjeto() {
+        return mProjeto;
+    }
+
+    public void setmProjeto(Projeto mProjeto) {
+        this.mProjeto = mProjeto;
+    }
+
+    private Projeto mProjeto;
 
     protected ProjetoStore(Dispatcher dispatcher) {
         super(dispatcher);
@@ -58,6 +69,10 @@ public class ProjetoStore extends Store{
                 break;
             case ProjetoActions.PROJETO_GET_PROCURA:
                 projetos.addAll((List<ParseObject>) action.getData().get(ProjetoActions.KEY_TEXT));
+                emitStoreChange();
+                break;
+            case ProjetoActions.PROJETO_GET_DETALHE:
+                mProjeto = (Projeto) action.getData().get(ProjetoActions.KEY_TEXT);
                 emitStoreChange();
                 break;
 

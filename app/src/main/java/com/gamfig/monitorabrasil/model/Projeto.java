@@ -32,6 +32,17 @@ public class Projeto {
 	private String formaApreciacao;
 	private String regime;
 	private String casa;
+    private String explicacao;
+
+    public String getExplicacao() {
+        return explicacao;
+    }
+
+    public void setExplicacao(String explicacao) {
+        this.explicacao = explicacao;
+    }
+
+
 	
 	
 	public Projeto(int idProjeto) {

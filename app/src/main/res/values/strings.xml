@@ -71,5 +71,6 @@
     <string name="msg_compartilhe">Olhe esse app @MonitoraBrasil para acompanhar os parlamentares https://play.google.com/store/apps/details?id=com.gamfig.monitorabrasil #monitoraBrasil</string>
     <string name="compartilhe">Compartilhe</string>
     <string name="precisa_logar">É necessário logar para salvar</string>
+    <string name="comentario">Comentário</string>
 
 </resources>

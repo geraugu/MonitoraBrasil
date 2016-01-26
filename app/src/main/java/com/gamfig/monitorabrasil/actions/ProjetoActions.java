@@ -11,4 +11,5 @@ public interface ProjetoActions {
 
 
     String PROJETO_GET_PROCURA = "projeto_get_procura";
+    String PROJETO_GET_DETALHE = "projeto_get_detalhe";
 }

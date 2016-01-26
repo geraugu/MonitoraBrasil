@@ -3,6 +3,7 @@ package com.gamfig.monitorabrasil.views;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -248,9 +249,10 @@ public class ProjetoListActivity extends AppCompatActivity
 //                    .replace(R.id.proposições_detail_container, fragment)
 //                    .commit();
         } else {
-//            Intent intent = new Intent(this, ParlamentarDetailActivity.class);
-//            intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,projeto.getObjectId());
-//            startActivity(intent);
+            Intent intent = new Intent(this, ProjetoDetailActivity.class);
+            intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,projeto.getObjectId());
+            intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
+            startActivity(intent);
         }
     }
 

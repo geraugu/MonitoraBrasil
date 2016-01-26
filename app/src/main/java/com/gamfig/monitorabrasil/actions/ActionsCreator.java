@@ -13,12 +13,12 @@ import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Pergunta;
+import com.gamfig.monitorabrasil.model.Projeto;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.LogInCallback;
 import com.parse.LogOutCallback;
-import com.parse.Parse;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -957,6 +957,52 @@ public class ActionsCreator {
         });
     }
 
+    public void getInfoProjeto(String id,String casa) {
+        HashMap<String, String> params = new HashMap();
+        params.put("id", id);
+        params.put("casa", casa);
+        ParseCloud.callFunctionInBackground("getProjeto", params, new FunctionCallback<String>() {
+
+
+            @Override
+            public void done(String jsonString, ParseException e) {
+                if (e == null) {
+                    try {
+                        if(jsonString != null) {
+                            JSONObject json = new JSONObject(jsonString);
+                            if(!json.getBoolean("error")){
+                                Projeto projeto = new Projeto(Integer.parseInt(json.getString("id")));
+                                projeto.setNome(json.getString("nome"));
+                                projeto.setSituacao(json.getString("situacao"));
+                                projeto.setLink(json.getString("link"));
+                                projeto.setFormaApreciacao(json.getString("formaApreciacao"));
+                                projeto.setRegime(json.getString("regime"));
+                                projeto.setUltimoDespacho(json.getString("ultimoDespacho"));
+                                projeto.setDtUltimoDespacho(json.getString("dtUltimoDespacho"));
+                                projeto.setEmenta(json.getString("ementa"));
+                                projeto.setNomeAutor(json.getString("nomeAutor"));
+                                projeto.setExplicacao(json.getString("explicacao"));
+                                dispatcher.dispatch(
+                                        ProjetoActions.PROJETO_GET_DETALHE,
+                                        ProjetoActions.KEY_TEXT, projeto
+                                );
+                            }
+                        }
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
+
+
+                }else{
+                    dispatcher.dispatch(
+                            ProjetoActions.PROJETO_GET_DETALHE,
+                            ProjetoActions.KEY_TEXT, "erro"
+                    );
+                }
+            }
+        });
+    }
+
     private ParseObject buscaCota(String id) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("CotaXCategoria");
         try {
@@ -1020,7 +1066,8 @@ public class ActionsCreator {
      */
     public void buscaProjetoPorPalavra(String chave, String casa) {
         ParseQuery<ParseObject> query1 = ParseQuery.getQuery("Proposicao");
-        query1.whereContainedIn("words", Arrays.asList(chave.toLowerCase()));
+        String[] chaves = chave.toLowerCase().split(" ");
+        query1.whereContainsAll("words", Arrays.asList(chaves));
  //       query1.whereEqualTo("casa",casa);
 
         ParseQuery<ParseObject> query2 = ParseQuery.getQuery("Proposicao");
