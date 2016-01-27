@@ -26,6 +26,7 @@ import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.stores.ProjetoStore;
 import com.gamfig.monitorabrasil.views.adapters.ProjetoAdapter;
 import com.gamfig.monitorabrasil.views.dialogs.DialogFiltro;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -224,6 +225,11 @@ public class ProjetoListActivity extends AppCompatActivity
     @Override
     public void onClickListener(View view, int position) {
         final ParseObject projeto = projetoStore.getProjetos().get(position);
+        try {
+            projeto.fetchIfNeeded();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         if (mTwoPane) {
 //            Bundle arguments = new Bundle();
 //            arguments.putString(VereadorDetailFragment.ID_POLITICO,politico.getObjectId());
@@ -250,8 +256,9 @@ public class ProjetoListActivity extends AppCompatActivity
 //                    .commit();
         } else {
             Intent intent = new Intent(this, ProjetoDetailActivity.class);
-            intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,projeto.getObjectId());
+            intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getNumber("id_proposicao").intValue()));
             intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
+            intent.putExtra("objectId",projeto.getObjectId());
             startActivity(intent);
         }
     }

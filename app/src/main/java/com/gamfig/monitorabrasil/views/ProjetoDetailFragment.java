@@ -35,6 +35,7 @@ public class ProjetoDetailFragment extends Fragment {
     private TextView txtUltimoDespacho;
     private TextView txtEmenta;
     private TextView txtExplicacao;
+    private TextView titulo;
     private TextView link;
     /**
      * The fragment argument representing the item ID that this fragment
@@ -61,9 +62,10 @@ public class ProjetoDetailFragment extends Fragment {
 
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-               // appBarLayout.setTitle(mItem.content);
-            }
+//            if (appBarLayout != null) {
+//               appBarLayout.setTitle("teste2");
+//            }
+
         }
     }
 
@@ -92,6 +94,7 @@ public class ProjetoDetailFragment extends Fragment {
         txtUltimoDespacho= (TextView) view.findViewById(R.id.txtUltimoDespacho);
         txtEmenta= (TextView) view.findViewById(R.id.txtEmenta);
         txtExplicacao= (TextView) view.findViewById(R.id.txtExplicacao);
+        titulo= (TextView) view.findViewById(R.id.title);
         link= (TextView) view.findViewById(R.id.link);
     }
 
@@ -107,6 +110,7 @@ public class ProjetoDetailFragment extends Fragment {
 
     private void updateUI() {
         Projeto projeto = projetoStore.getmProjeto();
+        titulo.setText(projeto.getNome());
         txtDtApresentacao.setText(projeto.getDtApresentacao());
         txtAutor.setText(projeto.getNomeAutor());
         txtSituacao.setText(projeto.getSituacao());

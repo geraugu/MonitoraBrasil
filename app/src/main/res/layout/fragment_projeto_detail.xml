@@ -5,7 +5,12 @@
     android:orientation="vertical"
     tools:context="com.gamfig.monitorabrasil.views.ProjetoDetailFragment" >
 
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:id="@+id/title"
+        android:textStyle="bold" />
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -23,7 +28,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="01/01/2015"
+                android:text="carregando"
                 android:id="@+id/txtDtApresentacao"
                 android:layout_marginLeft="10dp"
                 android:textColor="@android:color/black" />
@@ -41,34 +46,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fulano"
                 android:id="@+id/txtAutor"
                 android:layout_marginLeft="10dp"
                 android:textColor="@android:color/black" />
         </TableRow>
+
+
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Situação"
-                android:textStyle="bold" />
-
-        </TableRow>
-        <TableRow>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Fulano"
-                android:id="@+id/txtSituacao"
-                android:layout_marginLeft="10dp"
-                android:textColor="@android:color/black" />
-        </TableRow>
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -79,12 +66,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="01/01/2015"
                 android:id="@+id/txtdtUltimoDespacho"
                 android:layout_marginLeft="10dp"
                 android:textColor="@android:color/black" />
         </TableRow>
     </TableLayout>
+    <View style="@style/Divider"
+        android:layout_marginTop="10dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Situação"
+        android:textStyle="bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtSituacao"
+        android:layout_marginLeft="10dp"
+        android:textColor="@android:color/black" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -96,13 +95,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fulano"
                 android:id="@+id/txtUltimoDespacho"
                 android:layout_marginLeft="10dp"
                 android:textColor="@android:color/black" />
 
 
-    <View style="@style/Divider"/>
+    <View style="@style/Divider"
+        android:layout_marginTop="10dp" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -111,7 +110,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="fa sdfdaslç ldkjafs adjs façl "
         android:id="@+id/txtEmenta"
         android:layout_marginLeft="10dp"
         android:textColor="@android:color/black" />
@@ -124,7 +122,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="fa sdfdaslç ldkjafs adjs façl "
         android:id="@+id/txtExplicacao"
         android:layout_marginLeft="10dp"
         android:textColor="@android:color/black" />
@@ -137,7 +134,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="fa sdfdaslç ldkjafs adjs façl "
         android:id="@+id/link"
         android:layout_marginLeft="10dp"
         android:autoLink="web"

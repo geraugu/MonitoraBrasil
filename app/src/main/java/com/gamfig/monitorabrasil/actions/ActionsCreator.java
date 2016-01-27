@@ -970,7 +970,7 @@ public class ActionsCreator {
                     try {
                         if(jsonString != null) {
                             JSONObject json = new JSONObject(jsonString);
-                            if(!json.getBoolean("error")){
+                            if(json.getString("ementa").length()>0){
                                 Projeto projeto = new Projeto(Integer.parseInt(json.getString("id")));
                                 projeto.setNome(json.getString("nome"));
                                 projeto.setSituacao(json.getString("situacao"));
