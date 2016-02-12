@@ -2,6 +2,7 @@ package com.gamfig.monitorabrasil.actions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
@@ -9,6 +10,7 @@ import com.crashlytics.android.answers.CustomEvent;
 import com.crashlytics.android.answers.LoginEvent;
 import com.crashlytics.android.answers.SearchEvent;
 import com.crashlytics.android.answers.SignUpEvent;
+import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Comparacao;
@@ -27,6 +29,7 @@ import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.parse.SendCallback;
 import com.parse.SignUpCallback;
 
 import org.json.JSONException;
@@ -209,6 +212,25 @@ public class ActionsCreator {
         });
     }
 
+    public void getUltimoComentarioProjeto(){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("ComentarioProjeto");
+        query.addDescendingOrder("createdAt");
+        query.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    dispatcher.dispatch(
+                            ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO,
+                            ComentarioActions.KEY_TEXT, object);
+                } else {
+                    dispatcher.dispatch(
+                            ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO,
+                            ComentarioActions.KEY_TEXT, "erro");
+                }
+            }
+        });
+    }
+
     public void enviarMensagem (String mensagem, String tipo, String idObject){
         ParseUser user = ParseUser.getCurrentUser();
         if(user!= null){
@@ -316,6 +338,34 @@ public class ActionsCreator {
                         @Override
                         public void done(ParseException e) {
                             if (e == null) {
+                                //enviar push
+                                ParsePush push = new ParsePush();
+                                push.setChannel( "p_"+pergunta.getObjectId());
+                                JSONObject data = new JSONObject();
+                                JSONObject json = new JSONObject();
+                                try {
+                                    ParseObject tema = (ParseObject) pergunta.get("tema");
+                                    data.put("is_background", false);
+                                    json.put("idTema", tema.getObjectId());
+                                    json.put("pergunta", pergunta.getObjectId());
+                                    json.put("alerta", "Nova resposta para a pergunta: " + pergunta.getString("texto"));
+                                    json.put("titulo", AppController.getInstance().getString(R.string.title_activity_dialoga ));
+                                    data.put("data", json);
+
+                                } catch (JSONException e1) {
+                                    e1.printStackTrace();
+                                }
+                                push.setData(data);
+                                push.sendInBackground(new SendCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        if (e != null) {
+                                            Answers.getInstance().logCustom(new CustomEvent("envio_push")
+                                                    .putCustomAttribute("pergunta", pergunta.getObjectId()));
+                                        }
+
+                                    }
+                                });
                                 dispatcher.dispatch(
                                         DialogaActions.DIALOGA_ENVIAR_RESPOSTA,
                                         DialogaActions.KEY_TEXT, "sucesso"
@@ -512,35 +562,38 @@ public class ActionsCreator {
             });
         }else{
             voto = new ParseObject("VotoDialoga");
-            voto.put("user",ParseUser.getCurrentUser());
-            voto.put("resposta", resposta);
-            voto.put("sim_nao", "s");
-            voto.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    //atualizar o contador da resposta
-                    resposta.increment("qtd_sim");
-                    resposta.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                dispatcher.dispatch(
-                                        DialogaActions.DIALOGA_CONCORDO,
-                                        DialogaActions.KEY_TEXT, "sucesso"
-                                );
-                            } else {
-                                dispatcher.dispatch(
-                                        DialogaActions.DIALOGA_CONCORDO,
-                                        DialogaActions.KEY_TEXT, "erro"
-                                );
+            if (ParseUser.getCurrentUser() != null && resposta != null) {
+                voto.put("user", ParseUser.getCurrentUser());
+                voto.put("resposta", resposta);
+                voto.put("sim_nao", "s");
+                voto.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        //atualizar o contador da resposta
+                        resposta.increment("qtd_sim");
+                        resposta.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (e == null) {
+                                    dispatcher.dispatch(
+                                            DialogaActions.DIALOGA_CONCORDO,
+                                            DialogaActions.KEY_TEXT, "sucesso"
+                                    );
+                                } else {
+                                    dispatcher.dispatch(
+                                            DialogaActions.DIALOGA_CONCORDO,
+                                            DialogaActions.KEY_TEXT, "erro"
+                                    );
+                                }
                             }
-                        }
-                    });
-                }
-            });
-
+                        });
+                    }
+                });
+            }
         }
+
         voto.pinInBackground();
+
 
     }
 
@@ -579,35 +632,38 @@ public class ActionsCreator {
             });
         }else {
             voto = new ParseObject("VotoDialoga");
-            voto.put("user", ParseUser.getCurrentUser());
-            voto.put("resposta", resposta);
-            voto.put("sim_nao", "n");
-            voto.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    //atualizar o contador da resposta
-                    resposta.increment("qtd_nao");
-                    resposta.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                dispatcher.dispatch(
-                                        DialogaActions.DIALOGA_CONCORDO,
-                                        DialogaActions.KEY_TEXT, "sucesso"
-                                );
+            if (ParseUser.getCurrentUser() != null && resposta != null) {
+                voto.put("user", ParseUser.getCurrentUser());
+                voto.put("resposta", resposta);
+                voto.put("sim_nao", "n");
+                voto.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        //atualizar o contador da resposta
+                        resposta.increment("qtd_nao");
+                        resposta.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (e == null) {
+                                    dispatcher.dispatch(
+                                            DialogaActions.DIALOGA_CONCORDO,
+                                            DialogaActions.KEY_TEXT, "sucesso"
+                                    );
 
-                            } else {
-                                dispatcher.dispatch(
-                                        DialogaActions.DIALOGA_CONCORDO,
-                                        DialogaActions.KEY_TEXT, "erro"
-                                );
+                                } else {
+                                    dispatcher.dispatch(
+                                            DialogaActions.DIALOGA_CONCORDO,
+                                            DialogaActions.KEY_TEXT, "erro"
+                                    );
+                                }
                             }
-                        }
-                    });
-                }
-            });
+                        });
+                    }
+                });
+            }
         }
         voto.pinInBackground();
+
     }
 
     /**
@@ -1068,7 +1124,7 @@ public class ActionsCreator {
         ParseQuery<ParseObject> query1 = ParseQuery.getQuery("Proposicao");
         String[] chaves = chave.toLowerCase().split(" ");
         query1.whereContainsAll("words", Arrays.asList(chaves));
- //       query1.whereEqualTo("casa",casa);
+        //       query1.whereEqualTo("casa",casa);
 
         ParseQuery<ParseObject> query2 = ParseQuery.getQuery("Proposicao");
         query2.whereStartsWith("tx_nome", chave.toUpperCase());
@@ -1080,8 +1136,8 @@ public class ActionsCreator {
         queries.add(query2);
 
         ParseQuery<ParseObject> query = ParseQuery.or(queries);
-         query.addDescendingOrder("nr_ano");
-         //query.addDescendingOrder("tx_nome");
+        query.addDescendingOrder("nr_ano");
+        //query.addDescendingOrder("tx_nome");
 
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override

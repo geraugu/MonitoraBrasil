@@ -1,6 +1,7 @@
 package com.gamfig.monitorabrasil.views.fragments;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +13,10 @@ import android.view.ViewGroup;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
+import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.stores.ProjetoStore;
+import com.gamfig.monitorabrasil.views.ProjetoDetailActivity;
+import com.gamfig.monitorabrasil.views.ProjetoDetailFragment;
 import com.gamfig.monitorabrasil.views.adapters.ProjetoAdapter;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -26,7 +30,7 @@ import java.util.List;
  * Use the {@link ProjetosFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProjetosFragment extends Fragment {
+public class ProjetosFragment extends Fragment implements RecyclerViewOnClickListenerHack{
     private static final String ARG_PARAM1 = "param1";
 
     private String idPolitico;
@@ -111,7 +115,7 @@ public class ProjetosFragment extends Fragment {
         mRecyclerView.setLayoutManager(llm);
         mAdapter = new ProjetoAdapter(actionsCreator);
         mRecyclerView.setAdapter(mAdapter);
-      //  mAdapter.setRecyclerViewOnClickListenerHack(this);
+        mAdapter.setRecyclerViewOnClickListenerHack(this);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -171,4 +175,13 @@ public class ProjetosFragment extends Fragment {
     }
 
 
+    @Override
+    public void onClickListener(View view, int position) {
+        ParseObject projeto = projetoStore.getProjetos().get(position);
+        Intent intent = new Intent(getContext(), ProjetoDetailActivity.class);
+        intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getNumber("id_proposicao").intValue()));
+        intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
+        intent.putExtra("objectId",projeto.getObjectId());
+        startActivity(intent);
+    }
 }

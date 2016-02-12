@@ -51,7 +51,7 @@ public class AppController extends Application {
     }
 
     public void setIdUsuario() {
-       this.idUsuario = this.getSharedPref().getInt(getString(R.string.id_key_idcadastro_novo),0);
+        this.idUsuario = this.getSharedPref().getInt(getString(R.string.id_key_idcadastro_novo),0);
     }
 
 
@@ -75,8 +75,14 @@ public class AppController extends Application {
         mInstance = this;
 
         //iniciando o parse
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, AppConfig.PARSE_APPLICATION_ID, AppConfig.PARSE_CLIENT_KEY);
+        //Parse.enableLocalDatastore(this);
+        //Parse.initialize(this, AppConfig.PARSE_APPLICATION_ID, AppConfig.PARSE_CLIENT_KEY);
+        Parse.initialize(new Parse.Configuration.Builder(this)
+                .applicationId(AppConfig.PARSE_APPLICATION_ID)
+                .clientKey(AppConfig.PARSE_CLIENT_KEY)
+                .enableLocalDataStore()
+      //          .server(AppConfig.URL_PARSE_SERVER)
+                .build());
         ParseInstallation installation =  ParseInstallation.getCurrentInstallation();
         if(null != ParseUser.getCurrentUser())
             installation.put("user", ParseUser.getCurrentUser());

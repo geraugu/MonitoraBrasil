@@ -489,6 +489,10 @@ public class LoginActivity extends AppCompatActivity {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+            catch (OutOfMemoryError e){
+                e.printStackTrace();
+            }
+
         }
     }
 

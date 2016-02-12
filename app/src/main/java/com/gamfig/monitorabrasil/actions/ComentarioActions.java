@@ -12,4 +12,5 @@ public interface ComentarioActions {
 
 
     String COMENTARIO_POLITICO_GET_ULTIMO = "comentario_politico_get_ultimo";
+    String COMENTARIO_PROJETO_GET_ULTIMO = "comentario_projeto_get_ultimo";
 }

@@ -72,6 +72,7 @@ public class ProjetoStore extends Store{
                 emitStoreChange();
                 break;
             case ProjetoActions.PROJETO_GET_DETALHE:
+               // action.getData().get(ProjetoActions.KEY_TEXT).getClass()
                 mProjeto = (Projeto) action.getData().get(ProjetoActions.KEY_TEXT);
                 emitStoreChange();
                 break;
