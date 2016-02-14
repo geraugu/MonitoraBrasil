@@ -42,6 +42,7 @@
 
             <!-- CARD ULTIMA INTERACAO NO APP-->
             <include layout="@layout/card_comentario" />
+            <include layout="@layout/card_comentario_projeto" />
 
             <!-- CARD RANKING USUARIO -->
 

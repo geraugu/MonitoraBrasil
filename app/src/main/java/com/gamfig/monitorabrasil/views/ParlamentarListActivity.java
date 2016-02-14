@@ -222,7 +222,7 @@ public class ParlamentarListActivity extends AppCompatActivity
     public void onClickListener(View view, int position) {
         ParseObject politico = null;
         if(realizouBusca) {
-            if (ranking) {
+           /* if (ranking) {
                 ParseObject ranking = politicoStore.getPoliticosFiltro().get(position);
                 try {
                     ranking.fetch();
@@ -231,9 +231,9 @@ public class ParlamentarListActivity extends AppCompatActivity
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-            } else {
+            } else {*/
                 politico = politicoStore.getPoliticosFiltro().get(position);
-            }
+           // }
         }else {
             if (ranking){
                 ParseObject ranking = politicoStore.getPoliticos().get(position);

@@ -44,6 +44,7 @@ import com.gamfig.monitorabrasil.views.util.Card;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.parse.ConfigCallback;
+import com.parse.GetCallback;
 import com.parse.GetDataCallback;
 import com.parse.ParseConfig;
 import com.parse.ParseException;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
     private View viewCardComparaGasto;
     private View viewCardComentarioPolitico;
+    private View viewCardComentarioProjeto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity
                 AppController.getInstance().startActivity(mIntent);
             }
         });
-
+        verificaPush();
 
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,16 +127,19 @@ public class MainActivity extends AppCompatActivity
         ParseConfig.getInBackground(new ConfigCallback() {
             @Override
             public void done(ParseConfig config, ParseException e) {
-                String data = config.getString("dtAtualizacaoPoliltico");
-                if(actionsCreator.getValorSharedPreferences("dataAtualizacao")==null) {
-                    actionsCreator.salvaNoSharedPreferences("dataAtualizacao", data);
-                    actionsCreator.getAllPoliticos();
-                }else{
-                    if(!actionsCreator.getValorSharedPreferences("dataAtualizacao").equals(data)){
-                        actionsCreator.salvaNoSharedPreferences("dataAtualizacao",data);
+                if(config.getString("dtAtualizacaoPoliltico")!=null){
+                    String data = config.getString("dtAtualizacaoPoliltico");
+                    if(actionsCreator.getValorSharedPreferences("dataAtualizacao")==null) {
+                        actionsCreator.salvaNoSharedPreferences("dataAtualizacao", data);
                         actionsCreator.getAllPoliticos();
+                    }else{
+                        if(!actionsCreator.getValorSharedPreferences("dataAtualizacao").equals(data)){
+                            actionsCreator.salvaNoSharedPreferences("dataAtualizacao",data);
+                            actionsCreator.getAllPoliticos();
+                        }
                     }
                 }
+
             }
         });
 
@@ -152,12 +157,28 @@ public class MainActivity extends AppCompatActivity
         //busca ultimo comentario politico
         actionsCreator.getUltimoComentarioPolitico(null);
 
+        //busca ultimo comentario politico
+        actionsCreator.getUltimoComentarioProjeto();
+
         //setup headerview
         if(ParseUser.getCurrentUser()!=null)
             setupHeader();
 
 
 
+    }
+    private void verificaPush() {
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            if(extras.getString("idPergunta") != null){
+                //abrir a activity
+                Intent intent = new Intent(this,DialogaActivity.class);
+
+                intent.putExtra("perguntaId", extras.getString("idPergunta"));
+                intent.putExtra("temaId", extras.getString("idTema"));
+                startActivity(intent);
+            }
+        }
     }
 
     private void setupHeader() {
@@ -191,7 +212,7 @@ public class MainActivity extends AppCompatActivity
             });
         }
 
-       // headerView.setBackground(ContextCompat.getDrawable(this, Usuario.buscaImagemTopo()));
+        // headerView.setBackground(ContextCompat.getDrawable(this, Usuario.buscaImagemTopo()));
     }
 
     private void initDependencies() {
@@ -208,6 +229,7 @@ public class MainActivity extends AppCompatActivity
         pbDialoga = (ProgressBar) findViewById(R.id.pbDialoga);
         viewCardComparaGasto =  findViewById(R.id.llCardComparaGastos);
         viewCardComentarioPolitico = findViewById(R.id.llCardComentario);
+        viewCardComentarioProjeto = findViewById(R.id.llCardComentarioProjeto);
     }
 
     private void buscaTweet() {
@@ -282,7 +304,34 @@ public class MainActivity extends AppCompatActivity
             case ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO:
                 updateCardComentarioPolitico();
                 break;
+            case ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO:
+                updateCardComentarioProjeto();
+                break;
         }
+    }
+
+    private void updateCardComentarioProjeto() {
+        final ParseObject comentario = comentarioStore.getComentario();
+        final ParseObject projeto =  comentario.getParseObject("proposicao");
+
+        projeto.fetchInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                new Card().montaCardComentario(viewCardComentarioProjeto,comentario,projeto);
+                viewCardComentarioProjeto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getApplicationContext(), ProjetoDetailActivity.class);
+                        intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getNumber("id_proposicao").intValue()));
+                        intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
+                        intent.putExtra("objectId",projeto.getObjectId());
+                        startActivity(intent);
+                    }
+                });
+            }
+        });
+
+
     }
 
     private void updateCardComentarioPolitico() {
@@ -308,21 +357,31 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(dialogaStore);
-        dispatcher.register(politicoStore);
-        dispatcher.register(comentarioStore);
+
         if(ParseUser.getCurrentUser()!=null)
             setupHeader();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStart(){
+        super.onStart();
+        dispatcher.register(this);
+        dispatcher.register(dialogaStore);
+        dispatcher.register(politicoStore);
+        dispatcher.register(comentarioStore);
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
         dispatcher.unregister(this);
         dispatcher.unregister(dialogaStore);
         dispatcher.unregister(politicoStore);
         dispatcher.unregister(comentarioStore);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
 

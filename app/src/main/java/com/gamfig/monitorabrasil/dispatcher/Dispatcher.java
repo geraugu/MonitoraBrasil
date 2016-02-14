@@ -22,12 +22,20 @@ public class Dispatcher {
     }
 
     public void register(final Object cls) {
-        bus.register(cls);
+        try {
+            bus.register(cls);
+        }catch (Exception e){
 
+        }
     }
 
     public void unregister(final Object cls) {
-        bus.unregister(cls);
+        try {
+            bus.unregister(cls);
+        }catch (Exception e){
+
+        }
+
     }
 
     public void emitChange(Store.StoreChangeEvent o) {

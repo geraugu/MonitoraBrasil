@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
@@ -48,7 +47,7 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
         View view = inflater.inflate(R.layout.fragment_dialoga, container, false);
         initDependencies();
         setupView(view);
-        actionsCreator.getAllTemas();
+
         //verificar se tem um id de pergunta
         if(getArguments() != null){
             String perguntaId = getArguments().getString("perguntaId");
@@ -65,9 +64,11 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
                 ft.addToBackStack("tag");
                 ft.commit();
             }
+
+
         }
 
-
+        actionsCreator.getAllTemas();
 
 
         return view;

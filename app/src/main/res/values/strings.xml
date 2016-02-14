@@ -72,5 +72,6 @@
     <string name="compartilhe">Compartilhe</string>
     <string name="precisa_logar">É necessário logar para salvar</string>
     <string name="comentario">Comentário</string>
+    <string name="comentario_projeto">Comentário do Projeto</string>
 
 </resources>

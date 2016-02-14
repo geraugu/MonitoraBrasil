@@ -57,6 +57,50 @@ public class Card {
         }
     }
 
+    public void montaCardComentario(View v, ParseObject comentario, ParseObject projeto) {
+        TextView txtUser = (TextView) v.findViewById(R.id.txtUser);
+        TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
+        TextView txtHorario = (TextView) v.findViewById(R.id.txtHorario);
+        TextView txtPolitico =(TextView)v.findViewById(R.id.txtPolitico);
+        final ImageView imgUser = (ImageView) v.findViewById(R.id.imgUser);
+        txtUser.setText(comentario.getString("nome"));
+        txtComentario.setText(comentario.get("tx_comentario").toString());
+        txtPolitico.setText(String.format("%s - %s",
+                projeto.getString("tx_nome"),
+                projeto.getString("nome_autor")));
+
+
+        Calendar cal = Calendar.getInstance();
+
+        //calcula o horario da mensagem
+        Date data = comentario.getCreatedAt();
+        cal.setTime(data);
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd/MM/yy HH:mm");
+        txtHorario.setText(dt1.format(cal.getTime()));
+
+        //busca a imagem do usuario
+        ParseUser user = comentario.getParseUser("user");
+        try {
+            user.fetchIfNeeded();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if(user != null) {
+            ParseFile foto = user.getParseFile("foto");
+            if (foto != null)
+                foto.getDataInBackground(new GetDataCallback() {
+                    public void done(byte[] data, ParseException e) {
+                        if (e == null) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, true);
+                            imgUser.setImageBitmap(bitmap);
+                        }
+                    }
+                });
+        }
+    }
+
     public void montaCardComentario(View v,ParseObject comentario){
         TextView txtUser = (TextView) v.findViewById(R.id.txtUser);
         TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
@@ -133,4 +177,6 @@ public class Card {
 
         return ret;
     }
+
+
 }

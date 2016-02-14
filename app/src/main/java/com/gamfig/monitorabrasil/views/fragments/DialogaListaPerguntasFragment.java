@@ -194,6 +194,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
                                         @Override
                                         public void onClick(View v) {
                                             Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                             AppController.getInstance().startActivity(intent);
                                         }
                                     }).show();
@@ -304,7 +305,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
     public void onResume() {
         super.onResume();
         dispatcher.register(this);
-        dispatcher.register(dialogaStore);
+       dispatcher.register(dialogaStore);
     }
 
     @Override
