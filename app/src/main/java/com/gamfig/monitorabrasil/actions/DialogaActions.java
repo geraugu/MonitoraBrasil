@@ -3,7 +3,7 @@ package com.gamfig.monitorabrasil.actions;
 /**
  * Created by Geraldo on 13/08/2015.
  */
-public interface DialogaActions {
+public class DialogaActions {
     String DIALOGA_GET_TEMAS = "dialoga_get_temas";
     String DIALOGA_GET_PERGUNTA_RESPOSTAS = "dialoga_get_pergunta_resposta";
     String DIALOGA_GET_PERGUNTAS = "dialoga_get_perguntas";

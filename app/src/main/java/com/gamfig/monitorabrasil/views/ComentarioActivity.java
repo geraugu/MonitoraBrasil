@@ -18,16 +18,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import com.gamfig.monitorabrasil.POJO.ComentarioEvent;
 import com.gamfig.monitorabrasil.R;
-import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.ComentarioActions;
 import com.gamfig.monitorabrasil.application.AppController;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.stores.ComentarioStore;
 import com.gamfig.monitorabrasil.views.adapters.ComentarioAdapter;
 import com.parse.ParseUser;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class ComentarioActivity extends AppCompatActivity {
     private Toolbar mToolbar;
@@ -37,9 +36,7 @@ public class ComentarioActivity extends AppCompatActivity {
     private String tipo;
     private String idObjeto;
 
-    private Dispatcher dispatcher;
-    private ActionsCreator actionsCreator;
-    private ComentarioStore comentarioStore;
+    private ComentarioActions actionsCreator;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,9 +69,7 @@ public class ComentarioActivity extends AppCompatActivity {
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        comentarioStore = ComentarioStore.get(dispatcher);
+        actionsCreator = new ComentarioActions();
     }
 
 
@@ -116,7 +111,7 @@ public class ComentarioActivity extends AppCompatActivity {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         llm.setReverseLayout(true);
         mRecyclerView.setLayoutManager(llm);
-        mAdapter = new ComentarioAdapter(actionsCreator);
+        mAdapter = new ComentarioAdapter();
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -143,26 +138,9 @@ public class ComentarioActivity extends AppCompatActivity {
 
     }
 
-    private void updateUI() {
-        mAdapter.setItems(comentarioStore.getComentarios());
+    private void updateUI(ComentarioEvent event) {
+        mAdapter.setItems(event.comentarios);
         pb.setVisibility(View.INVISIBLE);
-    }
-
-    /**
-     * Atualiza a UI depois de uma action
-     * @param event
-     */
-    @Subscribe
-    public void onTodoStoreChange(ComentarioStore.ComentarioStoreChangeEvent event) {
-        String evento = comentarioStore.getEvento();
-        switch (evento){
-            case ComentarioActions.COMENTARIO_ENVIAR:
-                actionsCreator.getAllComentarios(tipo,idObjeto);
-                break;
-            case ComentarioActions.COMENTARIO_GET_ALL:
-                updateUI();
-                break;
-        }
     }
 
     @Override
@@ -184,7 +162,31 @@ public class ComentarioActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // This method will be called when a MessageEvent is posted
+    @Subscribe
+    public void onMessageEvent(ComentarioEvent event){
+        updateUI(event);
+    }
+
+    // This method will be called when a SomeOtherEvent is posted
+//    @Subscribe
+//    public void onEvent(SomeOtherEvent event){
+//        doSomethingWith(event);
+//    }
+
     @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+ /*   @Override
     public void onResume() {
         super.onResume();
         dispatcher.register(this);
@@ -196,5 +198,5 @@ public class ComentarioActivity extends AppCompatActivity {
         super.onPause();
         dispatcher.unregister(this);
         dispatcher.unregister(comentarioStore);
-    }
+    }*/
 }

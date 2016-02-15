@@ -1,9 +1,15 @@
 package com.gamfig.monitorabrasil.actions;
 
+import com.parse.FindCallback;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.List;
+
 /**
  * Created by Geraldo on 13/08/2015.
  */
-public interface PoliticoActions {
+public class PoliticoActions {
     String POLITICO_AVALIAR = "politico_avaliar";
     String POLITICO_COMENTAR = "politico_comentar";
     String POLITICO_GET_INFOS = "politico_get_infos";
@@ -16,5 +22,17 @@ public interface PoliticoActions {
     String KEY_ID = "key-id";
     String POLITICO_GET_FILTRO = "politico_get_filtro";
 
+    public void getAllPoliticos(){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Politico");
 
+        query.setLimit(1000);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, com.parse.ParseException e) {
+                ParseObject.pinAllInBackground(list);
+            }
+        });
+        getPartidos(true);
+        getCategoriasCotas(null, true);
+    }
 }

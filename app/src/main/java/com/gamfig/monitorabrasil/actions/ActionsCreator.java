@@ -2,7 +2,6 @@ package com.gamfig.monitorabrasil.actions;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
@@ -10,6 +9,7 @@ import com.crashlytics.android.answers.CustomEvent;
 import com.crashlytics.android.answers.LoginEvent;
 import com.crashlytics.android.answers.SearchEvent;
 import com.crashlytics.android.answers.SignUpEvent;
+import com.gamfig.monitorabrasil.POJO.ComentarioEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
@@ -32,6 +32,7 @@ import com.parse.SaveCallback;
 import com.parse.SendCallback;
 import com.parse.SignUpCallback;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -159,127 +160,6 @@ public class ActionsCreator {
     #   ACTIONS DE COMENTARIO
     **/
 
-
-    public void getAllComentarios(String tipo, String idObject){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery(tipo);
-        if(!tipo.equals("Comentario")) {
-            if (tipo.equals("ComentarioProjeto")) {
-                ParseObject projeto = ParseObject.createWithoutData("Proposicao", idObject);
-                query.whereEqualTo("proposicao", projeto);
-            } else {
-                ParseObject politico = ParseObject.createWithoutData("Politico", idObject);
-                query.whereEqualTo("politico", politico);
-            }
-        }
-        query.include("user");
-        query.addDescendingOrder("createdAt");
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, com.parse.ParseException e) {
-                if (e == null) {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_GET_ALL,
-                            ComentarioActions.KEY_TEXT, list);
-                } else {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_GET_ALL,
-                            ComentarioActions.KEY_TEXT, "erro");
-                }
-            }
-        });
-    }
-
-    public void getUltimoComentarioPolitico(String id){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("ComentarioPolitico");
-        if(id != null){
-            ParseObject politico = ParseObject.createWithoutData("Politico",id);
-            query.whereEqualTo("politico",politico);
-        }
-        query.addDescendingOrder("createdAt");
-        query.getFirstInBackground(new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                if (e == null) {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO,
-                            ComentarioActions.KEY_TEXT, object);
-                } else {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO,
-                            ComentarioActions.KEY_TEXT, "erro");
-                }
-            }
-        });
-    }
-
-    public void getUltimoComentarioProjeto(){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("ComentarioProjeto");
-        query.addDescendingOrder("createdAt");
-        query.getFirstInBackground(new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                if (e == null) {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO,
-                            ComentarioActions.KEY_TEXT, object);
-                } else {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO,
-                            ComentarioActions.KEY_TEXT, "erro");
-                }
-            }
-        });
-    }
-
-    public void enviarMensagem (String mensagem, String tipo, String idObject){
-        ParseUser user = ParseUser.getCurrentUser();
-        if(user!= null){
-            ParseObject comentario =new ParseObject(tipo);
-            ParseObject object;
-            if(!tipo.equals("Comentario")) {
-                if (!tipo.equals("ComentarioProjeto")) {
-                    //busca politico
-                    object = ParseObject.createWithoutData("Politico", idObject);
-
-                    comentario.put("politico", object);
-                } else {
-                    object = ParseObject.createWithoutData("Proposicao", idObject);
-                    comentario.put("proposicao", object);
-                }
-                //incrementa o numero de cometarios
-                object.fetchInBackground(new GetCallback<ParseObject>() {
-                    @Override
-                    public void done(ParseObject object, ParseException e) {
-                        object.increment("nr_comentarios");
-                        object.saveInBackground();
-                    }
-                });
-            }
-            comentario.put("tx_comentario",mensagem);
-            comentario.put("user", user);
-            comentario.put("nome", user.getString("nome"));
-
-            comentario.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    dispatcher.dispatch(
-                            ComentarioActions.COMENTARIO_ENVIAR,
-                            ComentarioActions.KEY_TEXT, "sucesso"
-                    );
-                }
-            });
-
-
-
-
-        }else{
-            dispatcher.dispatch(
-                    ComentarioActions.COMENTARIO_ENVIAR,
-                    ComentarioActions.KEY_TEXT, "erro"
-            );
-            return;
-        }
-    }
 
 
 
@@ -735,19 +615,7 @@ public class ActionsCreator {
         return null;
     }
 
-    public void getAllPoliticos(){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Politico");
 
-        query.setLimit(1000);
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, com.parse.ParseException e) {
-                ParseObject.pinAllInBackground(list);
-            }
-        });
-        getPartidos(true);
-        getCategoriasCotas(null, true);
-    }
 
     /**
      * Busca os politicos de uma casa especifica

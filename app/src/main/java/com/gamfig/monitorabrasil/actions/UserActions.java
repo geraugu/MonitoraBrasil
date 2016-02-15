@@ -3,7 +3,7 @@ package com.gamfig.monitorabrasil.actions;
 /**
  * Created by Geraldo on 13/08/2015.
  */
-public interface UserActions {
+public class UserActions {
     String USER_LOGAR = "user-logar";
     String USER_LOGOUT = "user-logout";
     String  USER_CADASTRO = "user_cadastro";

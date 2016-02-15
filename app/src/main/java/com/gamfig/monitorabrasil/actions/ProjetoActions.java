@@ -3,7 +3,7 @@ package com.gamfig.monitorabrasil.actions;
 /**
  * Created by Geraldo on 13/08/2015.
  */
-public interface ProjetoActions {
+public class ProjetoActions {
     String PROJETO_GET_TODOS = "projeto_get_todos";
 
     String KEY_TEXT = "key-text";

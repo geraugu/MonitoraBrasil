@@ -59,11 +59,11 @@ import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private Dispatcher dispatcher;
-    private ActionsCreator actionsCreator;
-    private DialogaStore dialogaStore;
-    private PoliticoStore politicoStore;
-    private ComentarioStore comentarioStore;
+    ActionsCreator actionsCreator;
+    DialogaActions dialogaActions;
+    PoliticoActions politicoActions;
+    ComentarioActions comentarioActions;
+
     private NestedScrollView mNestedScroll;
 
     private ProgressBar pbDialoga;
@@ -131,11 +131,11 @@ public class MainActivity extends AppCompatActivity
                     String data = config.getString("dtAtualizacaoPoliltico");
                     if(actionsCreator.getValorSharedPreferences("dataAtualizacao")==null) {
                         actionsCreator.salvaNoSharedPreferences("dataAtualizacao", data);
-                        actionsCreator.getAllPoliticos();
+                        politicoActions.getAllPoliticos();
                     }else{
                         if(!actionsCreator.getValorSharedPreferences("dataAtualizacao").equals(data)){
                             actionsCreator.salvaNoSharedPreferences("dataAtualizacao",data);
-                            actionsCreator.getAllPoliticos();
+                            politicoActions.getAllPoliticos();
                         }
                     }
                 }

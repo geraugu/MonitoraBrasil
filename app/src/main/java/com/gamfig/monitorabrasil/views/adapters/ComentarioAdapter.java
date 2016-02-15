@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gamfig.monitorabrasil.R;
-import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.parse.GetDataCallback;
 import com.parse.ParseException;
@@ -29,16 +28,15 @@ import java.util.List;
  */
 public class ComentarioAdapter extends RecyclerView.Adapter<ComentarioAdapter.ViewHolder> {
 
-    private static ActionsCreator actionsCreator;
+
     private List<ParseObject> mDataset;
     private RecyclerViewOnClickListenerHack mRecyclerViewOnClickListenerHack;
 
     private SimpleDateFormat dt1 = new SimpleDateFormat("dd/MM/yy HH:mm");
     private Calendar cal = Calendar.getInstance();
 
-    public ComentarioAdapter(ActionsCreator actionsCreator) {
+    public ComentarioAdapter() {
         mDataset = new ArrayList<>();
-        ComentarioAdapter.actionsCreator = actionsCreator;
     }
 
     @Override
