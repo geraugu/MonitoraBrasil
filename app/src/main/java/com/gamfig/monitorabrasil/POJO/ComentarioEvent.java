@@ -7,14 +7,40 @@ import java.util.List;
 /**
  * Created by geral_000 on 14/02/2016.
  */
-public class ComentarioEvent {
+public class ComentarioEvent extends Event{
     public  List<ParseObject> comentarios;
-    public String erro;
     public ParseObject comentario;
 
-    public ComentarioEvent() {
-
+    /**
+     * Cria um evento de comentario
+     * @param action nome da action
+     * @param list lista de comentarios
+     * @param erro erro se houver
+     */
+    public ComentarioEvent(String action, List<ParseObject> list, String erro) {
+        this.action = action;
+        this.comentarios = list;
+        this.erro = erro;
     }
+
+
+    public ComentarioEvent(String action, ParseObject comentario, String erro) {
+        this.action = action;
+        this.comentario = comentario;
+        this.erro = erro;
+    }
+
+
+
+    public ComentarioEvent(ParseObject object, String erro) {
+        this.comentario = object;
+        this.erro = erro;
+    }
+
+    public ComentarioEvent(String action) {
+        this.action = action;
+    }
+
 
 
     public ParseObject getComentario() {
@@ -25,18 +51,6 @@ public class ComentarioEvent {
         this.comentario = comentario;
     }
 
-    public ComentarioEvent(ParseObject object, String erro) {
-        this.comentario = object;
-        this.erro = erro;
-    }
-
-    public String getErro() {
-        return erro;
-    }
-
-    public void setErro(String erro) {
-        this.erro = erro;
-    }
 
     public List<ParseObject> getComentarios() {
         return comentarios;

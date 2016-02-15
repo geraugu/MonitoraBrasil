@@ -17,13 +17,12 @@ import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.gamfig.monitorabrasil.POJO.PoliticoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Grafico;
-import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.adapters.PresencaAdapter;
 import com.gamfig.monitorabrasil.views.dialogs.DialogAvaliacao;
 import com.gamfig.monitorabrasil.views.util.Card;
@@ -34,8 +33,9 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -50,9 +50,10 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
     private String idPolitico;
 
     private ParseObject politico;
-    private Dispatcher dispatcher;
     private ActionsCreator actionsCreator;
-    private PoliticoStore politicoStore;
+    private PoliticoActions politicoActions;
+    private PoliticoEvent politicoEvent;
+
     private RecyclerView mRecyclerView;
     private PresencaAdapter mAdapter;
     private RatingBar mRatingBar;
@@ -99,21 +100,20 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         mNestedScroll = (NestedScrollView)rootView;
         initDependencies();
         //busca as informacoes do politico
-        politico = actionsCreator.getPolitico(idPolitico);
+        politico = politicoActions.getPolitico(idPolitico);
         setupView(rootView);
-        actionsCreator.getComparacaoGasto(politico.getObjectId());
+        politicoActions.getComparacaoGasto(politico.getObjectId());
         
         //so tem presenca para os deputados
         if(politico.getString("tipo").equals("c"))
-            actionsCreator.getPresenca(politico);
+            politicoActions.getPresenca(politico);
 
         return rootView;
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        politicoStore = PoliticoStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        politicoActions = PoliticoActions.get();
     }
 
     private void setupView(View rootView) {
@@ -198,7 +198,7 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
 
 
     private void updateCardComparacao() {
-        Comparacao comparacao = politicoStore.getGasto();
+        Comparacao comparacao = politicoEvent.getComparacao();
 
         new Card().montaCardComparacaoGasto(mView,politico,comparacao);
 
@@ -210,10 +210,9 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(PoliticoStore.PoliticoStoreChangeEvent event) {
-        String evento =event.getEvento();
-        
-        switch (evento){
+    public void onMessageEvent(PoliticoEvent event){
+        politicoEvent = event;
+        switch (event.getAction()){
             case PoliticoActions.POLITICO_GET_COMPARACAO_GASTO:
                 updateCardComparacao();
                 break;
@@ -221,28 +220,26 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
                 carregaPresenca();
                 break;
         }
-            
     }
 
+
     private void carregaPresenca() {
-        List<ParseObject> presencas = politicoStore.getPresenca();
+        List<ParseObject> presencas = politicoEvent.getPresenca();
         mAdapter.setItems(presencas);
         mNestedScroll.scrollTo(0, 0);
     }
 
 
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(politicoStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(politicoStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override

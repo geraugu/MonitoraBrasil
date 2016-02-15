@@ -13,11 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.gamfig.monitorabrasil.POJO.PoliticoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
+import com.gamfig.monitorabrasil.actions.PoliticoActions;
 import com.gamfig.monitorabrasil.model.Grafico;
-import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.adapters.GastoAdapter;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -25,8 +25,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.parse.ParseObject;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -41,9 +42,10 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     private String idPolitico;
 
     private ParseObject politico;
-    private Dispatcher dispatcher;
     private ActionsCreator actionsCreator;
-    private PoliticoStore politicoStore;
+    private PoliticoActions politicoActions;
+    private PoliticoEvent politicoEvent;
+
     private RecyclerView mRecyclerView;
     private GastoAdapter mAdapter;
 
@@ -89,17 +91,16 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
         mNestedScroll = (NestedScrollView)rootView;
         initDependencies();
         //busca as informacoes do politico
-        politico = actionsCreator.getPolitico(idPolitico);
+        politico = politicoActions.getPolitico(idPolitico);
         setupView(rootView);
-        actionsCreator.getGastos(politico);
+        politicoActions.getGastos(politico);
 
         return rootView;
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        politicoStore = PoliticoStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        politicoActions = PoliticoActions.get();
     }
 
     private void setupView(View rootView) {
@@ -162,7 +163,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     }
 
     private void updateUI() {
-        List<ParseObject> gastos = politicoStore.getGastos();
+        List<ParseObject> gastos = politicoEvent.getGastos();
         if(gastos != null) {
             mAdapter.setItems(gastos);
             setData(gastos);
@@ -171,7 +172,7 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
     }
 
     private void updateHorizontalGraph(){
-        List<ParseObject> gastos = politicoStore.getGastos();
+        List<ParseObject> gastos = politicoEvent.getGastos();
         if(gastos != null) {
             mHorizontalChart.setData(grafico.horizontalBarDataGastos(gastos));
             // undo all highlights
@@ -185,22 +186,23 @@ public class GastosFragment extends Fragment implements OnChartValueSelectedList
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(PoliticoStore.PoliticoStoreChangeEvent event) {
-            updateUI();
+    public void onMessageEvent(PoliticoEvent event){
+        politicoEvent = event;
+        updateUI();
+    }
+
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-      //  dispatcher.register(politicoStore);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-   //     dispatcher.unregister(politicoStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override

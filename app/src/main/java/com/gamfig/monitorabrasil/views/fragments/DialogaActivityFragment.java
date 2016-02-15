@@ -13,18 +13,18 @@ import android.view.ViewGroup;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.gamfig.monitorabrasil.POJO.DialogaEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.model.Tema;
-import com.gamfig.monitorabrasil.stores.DialogaStore;
 import com.gamfig.monitorabrasil.views.adapters.TemaAdapter;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -34,9 +34,10 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
     private RecyclerView mRecyclerView;
     private TemaAdapter mAdapter;
 
-    private Dispatcher dispatcher;
+
     private ActionsCreator actionsCreator;
-    private DialogaStore dialogaStore;
+    private DialogaActions dialogaActions;
+    private DialogaEvent dialogaEvent;
 
     public DialogaActivityFragment() {
     }
@@ -68,16 +69,15 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
 
         }
 
-        actionsCreator.getAllTemas();
+        dialogaActions.getAllTemas();
 
 
         return view;
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        dialogaStore = DialogaStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        dialogaActions = DialogaActions.get();
     }
 
 
@@ -99,7 +99,8 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
     }
 
     private void updateUI() {
-        mAdapter.setItems(dialogaStore.getTemas());
+
+        mAdapter.setItems(dialogaEvent.getList());
 //        pb.setVisibility(View.INVISIBLE);
     }
 
@@ -109,24 +110,29 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(DialogaStore.DialogaStoreChangeEvent event) {
-        String evento = dialogaStore.getEvento();
-        switch (evento){
+    public void onMessageEvent(DialogaEvent event){
+        dialogaEvent = event;
+        switch (dialogaEvent.getAction()){
             case DialogaActions.DIALOGA_GET_TEMAS:
                 updateUI();
                 break;
             case DialogaActions.DIALOGA_ENVIAR_PERGUNTA:
-                Snackbar.make(getView(), "Pergunta inserida!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if(dialogaEvent.getErro()==null) {
+                    Snackbar.make(getView(), "Pergunta inserida!", Snackbar.LENGTH_LONG)
+                            .show();
+                }else{
+                    Snackbar.make(getView(), "Erro ao inserir a pergunta", Snackbar.LENGTH_LONG)
+                            .show();
+                }
+
                 break;
         }
     }
 
+
     @Override
     public void onClickListener(View view, int position) {
-
-
-        ParseObject tema =  dialogaStore.getTemas().get(position);
+        ParseObject tema =  dialogaEvent.getList().get(position);
         try {
             tema.pin();
             DialogaListaPerguntasFragment frag = DialogaListaPerguntasFragment.newInstance(
@@ -147,17 +153,15 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(dialogaStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(dialogaStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
 }

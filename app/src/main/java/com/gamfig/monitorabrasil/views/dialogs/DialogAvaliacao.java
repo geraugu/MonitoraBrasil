@@ -10,14 +10,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RatingBar;
 
+import com.gamfig.monitorabrasil.POJO.UserEvent;
 import com.gamfig.monitorabrasil.R;
-import com.gamfig.monitorabrasil.actions.ActionsCreator;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.stores.UserStore;
+import com.gamfig.monitorabrasil.actions.UserActions;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Created by Geraldo on 07/01/2016.
@@ -35,9 +35,10 @@ public class DialogAvaliacao extends DialogFragment {
 
     private boolean jaVotou;
 
-    private Dispatcher dispatcher;
-    private ActionsCreator actionsCreator;
-    private UserStore userStore;
+
+
+    private UserActions userActions;
+    private UserEvent userEvent;
 
     public DialogAvaliacao(ParseObject politico, String titulo) {
         this.titulo=titulo;
@@ -54,9 +55,7 @@ public class DialogAvaliacao extends DialogFragment {
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        userStore = UserStore.get(dispatcher);
+        userActions = UserActions.get();
     }
 
 
@@ -83,26 +82,28 @@ public class DialogAvaliacao extends DialogFragment {
             @Override
             public void onClick(final View v) {
                 if (ParseUser.getCurrentUser() != null) {
-                    actionsCreator.avaliar(mPolitico, rb.getRating(), userStore.getmAvaliacao());
+                    userActions.avaliar(mPolitico, rb.getRating(), userEvent.getAvaliacao());
                 }
                 getDialog().dismiss();
             }
         });
 
         //verificar se ja foi feita a avaliacao
-        actionsCreator.getAvaliacaoPolitico(mPolitico);
+        userActions.getAvaliacaoPolitico(mPolitico);
 
     }
     /**
      * Atualiza a UI depois de uma action
      * @param event
      */
-
     @Subscribe
-    public void onTodoStoreChange(UserStore.UserStoreChangeEvent event) {
-
-        rb.setRating((float)userStore.getmAvaliacao().getDouble("avaliacao"));
+    public void onMessageEvent(UserEvent event){
+        userEvent = event;
+        rb.setRating((float)event.getAvaliacao().getDouble("avaliacao"));
     }
+
+
+
 
 
     @Override
@@ -137,16 +138,14 @@ public class DialogAvaliacao extends DialogFragment {
         //dispatcher.register(userStore);
     }
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(userStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(userStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 }

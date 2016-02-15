@@ -25,18 +25,18 @@ import android.widget.Toast;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.gamfig.monitorabrasil.POJO.UserEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.UserActions;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.stores.UserStore;
 import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -59,9 +59,9 @@ public class LoginActivity extends AppCompatActivity {
     private ParseUser currentUser;
     private ImageButton btnFoto;
 
-    private Dispatcher dispatcher;
+
     private ActionsCreator actionsCreator;
-    private UserStore userStore;
+    private UserActions userActions;
 
     private LinearLayout form;
 
@@ -77,9 +77,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        userStore = UserStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        userActions = UserActions.get();
     }
 
     private void setupView() {
@@ -252,7 +251,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void logout() {
 
-        actionsCreator.logout();
+        userActions.logout();
     }
 
     /**
@@ -317,7 +316,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void logar() {
         if(validaCampos()){
-            actionsCreator.logar(getInputUsuario(), getInputSenha());
+            userActions.logar(getInputUsuario(), getInputSenha());
         }
     }
 
@@ -437,18 +436,20 @@ public class LoginActivity extends AppCompatActivity {
      * Atualiza a UI depois de uma action
      * @param event
      */
+
+
     @Subscribe
-    public void onTodoStoreChange(UserStore.UserStoreChangeEvent event) {
-        switch (userStore.getEvento()) {
+    public void onMessageEvent(UserEvent event){
+        switch (event.getAction()) {
             case UserActions.USER_CADASTRO:
-                if(userStore.getStatus().equals("erro")){
+                if(event.getErro() != null){
                     showProgress(false);
                     Snackbar.make(form, "Houve um erro ao fazer seu cadastro", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
                 break;
             case UserActions.USER_LOGAR:
-                if(userStore.getStatus().equals("erro")){
+                if(event.getErro() != null){
                     showProgress(false);
                     Snackbar.make(form, "Houve um erro ao fazer o login", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -459,17 +460,15 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(userStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(userStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
 
@@ -524,7 +523,7 @@ public class LoginActivity extends AppCompatActivity {
         ParseFile mParseFile = new ParseFile("foto.png",byteArray);
 
         showProgress(true);
-        actionsCreator.cadastrar(nome, password, email,mParseFile);
+        userActions.cadastrar(nome, password, email,mParseFile);
 
     }
 

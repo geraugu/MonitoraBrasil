@@ -69,7 +69,7 @@ public class ComentarioActivity extends AppCompatActivity {
     }
 
     private void initDependencies() {
-        actionsCreator = new ComentarioActions();
+        actionsCreator = ComentarioActions.get();
     }
 
 

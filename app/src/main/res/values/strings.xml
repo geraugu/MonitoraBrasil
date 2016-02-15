@@ -74,5 +74,6 @@
     <string name="comentario">Comentário</string>
     <string name="comentario_projeto">Comentário do Projeto</string>
     <string name="erro_geral">Não foi possível recuperar os registros</string>
+    <string name="erro_enviar_comentario">Não foi possível enviar o comentário</string>
 
 </resources>

@@ -9,13 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.gamfig.monitorabrasil.POJO.ProjetoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
+import com.gamfig.monitorabrasil.actions.ProjetoActions;
 import com.gamfig.monitorabrasil.model.Projeto;
-import com.gamfig.monitorabrasil.stores.ProjetoStore;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * A fragment representing a single Projeto detail screen.
@@ -25,9 +26,9 @@ import com.squareup.otto.Subscribe;
  */
 public class ProjetoDetailFragment extends Fragment {
 
-    private Dispatcher dispatcher;
+
     private ActionsCreator actionsCreator;
-    private ProjetoStore projetoStore;
+    private ProjetoActions projetoActions;
     private TextView txtDtApresentacao;
     private TextView txtAutor;
     private TextView txtSituacao;
@@ -76,14 +77,13 @@ public class ProjetoDetailFragment extends Fragment {
 
         initDependencies();
         setupView(rootView);
-        actionsCreator.getInfoProjeto(getArguments().getString(ARG_ITEM_ID),getArguments().getString(ARG_CASA));
+        projetoActions.getInfoProjeto(getArguments().getString(ARG_ITEM_ID),getArguments().getString(ARG_CASA));
         return rootView;
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        projetoStore = ProjetoStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        projetoActions = ProjetoActions.get();
     }
 
     private void setupView(View view) {
@@ -103,13 +103,13 @@ public class ProjetoDetailFragment extends Fragment {
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(ProjetoStore.ProjetoStoreChangeEvent event) {
-
-        updateUI();
+    public void onMessageEvent(ProjetoEvent event){
+        updateUI(event);
     }
 
-    private void updateUI() {
-        Projeto projeto = projetoStore.getmProjeto();
+
+    private void updateUI(ProjetoEvent event) {
+        Projeto projeto = event.getProjeto();
         titulo.setText(projeto.getNome());
         txtDtApresentacao.setText(projeto.getDtApresentacao());
         txtAutor.setText(projeto.getNomeAutor());
@@ -123,17 +123,15 @@ public class ProjetoDetailFragment extends Fragment {
 
 
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(projetoStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(projetoStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
 

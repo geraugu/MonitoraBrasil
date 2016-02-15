@@ -18,21 +18,22 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.gamfig.monitorabrasil.POJO.PoliticoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
-import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.adapters.PoliticoAdapter;
 import com.gamfig.monitorabrasil.views.dialogs.DialogFiltro;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * An activity representing a list of Parlamentares. This activity
@@ -59,9 +60,10 @@ public class ParlamentarListActivity extends AppCompatActivity
      * device.
      */
     private boolean mTwoPane;
-    private Dispatcher dispatcher;
     private ActionsCreator actionsCreator;
-    private PoliticoStore politicoStore;
+    private PoliticoActions politicoActions;
+    private PoliticoEvent mPoliticoEvent;
+
     private RecyclerView mRecyclerView;
     private PoliticoAdapter mAdapter;
     private ProgressBar pb;
@@ -141,15 +143,15 @@ public class ParlamentarListActivity extends AppCompatActivity
                     .setActivateOnItemClick(true);
         }
 
-        actionsCreator.getAllPoliticos(casa,ordem);
+        politicoActions.getAllPoliticos(casa,ordem);
 
     }
 
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        politicoStore = PoliticoStore.get(dispatcher);
+
+        actionsCreator = ActionsCreator.get();
+        politicoActions = PoliticoActions.get();
     }
 
 
@@ -197,7 +199,7 @@ public class ParlamentarListActivity extends AppCompatActivity
                 @Override
                 public void onDismiss(DialogInterface dialog) {
                     pb.setVisibility(View.VISIBLE);
-                    actionsCreator.getAllPoliticos(casa,ordem);
+                    politicoActions.getAllPoliticos(casa,ordem);
 
 
                 }
@@ -232,11 +234,11 @@ public class ParlamentarListActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
             } else {*/
-                politico = politicoStore.getPoliticosFiltro().get(position);
+                politico = mPoliticoEvent.getPoliticosFiltro().get(position);
            // }
         }else {
             if (ranking){
-                ParseObject ranking = politicoStore.getPoliticos().get(position);
+                ParseObject ranking = mPoliticoEvent.getPoliticos().get(position);
                 try {
                     ranking.fetch();
                     if(ranking.getString("nome")==null) {
@@ -250,7 +252,7 @@ public class ParlamentarListActivity extends AppCompatActivity
                 }
 
             }else{
-                politico = politicoStore.getPoliticos().get(position);
+                politico = mPoliticoEvent.getPoliticos().get(position);
             }
         }
         if (mTwoPane) {
@@ -285,23 +287,23 @@ public class ParlamentarListActivity extends AppCompatActivity
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(politicoStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(politicoStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
-    private void updateUI() {
-        mAdapter.setItems(politicoStore.getPoliticos());
-
+    private void updateUI(PoliticoEvent event) {
+        mPoliticoEvent = event;
+        event.setPoliticos(event.getList());
+        mAdapter.setItems(event.getPoliticos());
         pb.setVisibility(View.INVISIBLE);
+
     }
 
     /**
@@ -309,17 +311,16 @@ public class ParlamentarListActivity extends AppCompatActivity
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(PoliticoStore.PoliticoStoreChangeEvent event) {
-        switch (event.getEvento()) {
+    public void onMessageEvent(PoliticoEvent event){
+        switch (event.getAction()) {
             case PoliticoActions.POLITICO_GET_ALL:
-                if(event.getStatus().equals("erro")){
-
+                if(event.getErro()!= null){
+                    Toast.makeText(getApplicationContext(),"Erro ao buscar informação :(",Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
-        updateUI();
+        updateUI(event);
     }
-
 
 
     @Override
@@ -341,7 +342,7 @@ public class ParlamentarListActivity extends AppCompatActivity
                 public boolean onQueryTextSubmit(String query) {
                     if (!query.isEmpty()) {
                         //realizar a busca
-                        mAdapter.setItems(politicoStore.filtrar(query, ranking));
+                        mAdapter.setItems(mPoliticoEvent.filtrar(query, ranking));
                         mAdapter.notifyDataSetChanged();
                         realizouBusca = true;
                     }
@@ -352,13 +353,13 @@ public class ParlamentarListActivity extends AppCompatActivity
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     if(realizouBusca && newText.isEmpty()){
-                        mAdapter.setItems(politicoStore.getPoliticos());
+                        mAdapter.setItems(mPoliticoEvent.getPoliticos());
                         mAdapter.notifyDataSetChanged();
                         realizouBusca = false;
                     }else{
                         //realizar a busca
 
-                        mAdapter.setItems(politicoStore.filtrar(newText,ranking));
+                        mAdapter.setItems(mPoliticoEvent.filtrar(newText,ranking));
                         mAdapter.notifyDataSetChanged();
                         realizouBusca = true;
                     }

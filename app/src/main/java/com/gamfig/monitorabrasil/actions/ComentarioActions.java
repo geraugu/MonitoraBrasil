@@ -20,7 +20,23 @@ import java.util.List;
  */
 public class ComentarioActions {
 
-    public ComentarioActions(){}
+    private static ComentarioActions instance;
+    public static final String COMENTARIO_GET_ALL = "comentario_get_all";
+    public static final String COMENTARIO_ENVIAR = "comentario_enviar";
+
+    public static final String COMENTARIO_POLITICO_GET_ULTIMO = "comentario_politico_get_ultimo";
+    public static final String COMENTARIO_PROJETO_GET_ULTIMO = "comentario_projeto_get_ultimo";
+
+    ComentarioActions() {
+    }
+    public static ComentarioActions get() {
+        if (instance == null) {
+            instance = new ComentarioActions();
+        }
+        return instance;
+    }
+
+
 
 
     public void getAllComentarios(String tipo, String idObject){
@@ -40,10 +56,10 @@ public class ComentarioActions {
             @Override
             public void done(List<ParseObject> list, com.parse.ParseException e) {
                 if (e == null) {
-                    EventBus.getDefault().post(new ComentarioEvent( list,null));
+                    EventBus.getDefault().post(new ComentarioEvent(COMENTARIO_GET_ALL, list,null));
 
                 } else {
-                    ComentarioEvent ce = new ComentarioEvent();
+                    ComentarioEvent ce = new ComentarioEvent(COMENTARIO_GET_ALL);
                     ce.setErro(AppController.getInstance().getString(R.string.erro_geral));
                     EventBus.getDefault().post(ce);
                 }
@@ -62,9 +78,9 @@ public class ComentarioActions {
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (e == null) {
-                    EventBus.getDefault().post(new ComentarioEvent( object, null));
+                    EventBus.getDefault().post(new ComentarioEvent(COMENTARIO_POLITICO_GET_ULTIMO, object, null));
                 } else {
-                    ComentarioEvent ce = new ComentarioEvent();
+                    ComentarioEvent ce = new ComentarioEvent(COMENTARIO_POLITICO_GET_ULTIMO);
                     ce.setErro(AppController.getInstance().getString(R.string.erro_geral));
                     EventBus.getDefault().post(ce);
                 }
@@ -79,9 +95,9 @@ public class ComentarioActions {
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (e == null) {
-                    EventBus.getDefault().post(new ComentarioEvent( object, null));
+                    EventBus.getDefault().post(new ComentarioEvent(COMENTARIO_PROJETO_GET_ULTIMO, object, null));
                 } else {
-                    ComentarioEvent ce = new ComentarioEvent();
+                    ComentarioEvent ce = new ComentarioEvent(COMENTARIO_PROJETO_GET_ULTIMO);
                     ce.setErro(AppController.getInstance().getString(R.string.erro_geral));
                     EventBus.getDefault().post(ce);
                 }
@@ -124,8 +140,8 @@ public class ComentarioActions {
                 }
             });
         }else{
-            ComentarioEvent ce = new ComentarioEvent();
-            ce.setErro(AppController.getInstance().getString(R.string.erro_geral));
+            ComentarioEvent ce = new ComentarioEvent(COMENTARIO_ENVIAR);
+            ce.setErro(AppController.getInstance().getString(R.string.erro_enviar_comentario));
             EventBus.getDefault().post(ce);
             return;
         }

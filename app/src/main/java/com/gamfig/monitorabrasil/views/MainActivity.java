@@ -25,20 +25,17 @@ import android.widget.TextView;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.gamfig.monitorabrasil.POJO.ComentarioEvent;
+import com.gamfig.monitorabrasil.POJO.DialogaEvent;
+import com.gamfig.monitorabrasil.POJO.PoliticoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.ComentarioActions;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
 import com.gamfig.monitorabrasil.application.AppController;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.model.Comentario;
 import com.gamfig.monitorabrasil.model.Comparacao;
-import com.gamfig.monitorabrasil.model.Pergunta;
 import com.gamfig.monitorabrasil.model.Tema;
-import com.gamfig.monitorabrasil.stores.ComentarioStore;
-import com.gamfig.monitorabrasil.stores.DialogaStore;
-import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.dialogs.DialogGostou;
 import com.gamfig.monitorabrasil.views.util.Card;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -51,10 +48,11 @@ import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 import com.twitter.sdk.android.tweetui.SearchTimeline;
 import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
+
+import org.greenrobot.eventbus.Subscribe;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -146,19 +144,19 @@ public class MainActivity extends AppCompatActivity
 
         //monta card do dialoga
         pbDialoga.setVisibility(View.VISIBLE);
-        actionsCreator.getPerguntaAleatoria();
+        dialogaActions.getPerguntaAleatoria();
 
         //monta o card de gasto
-        actionsCreator.getComparacaoGasto(null);
+        politicoActions.getComparacaoGasto(null);
 
         //tweet search #monitoraBrasil
         buscaTweet();
 
         //busca ultimo comentario politico
-        actionsCreator.getUltimoComentarioPolitico(null);
+        comentarioActions.getUltimoComentarioPolitico(null);
 
         //busca ultimo comentario politico
-        actionsCreator.getUltimoComentarioProjeto();
+        comentarioActions.getUltimoComentarioProjeto();
 
         //setup headerview
         if(ParseUser.getCurrentUser()!=null)
@@ -216,11 +214,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        dialogaStore = DialogaStore.get(dispatcher);
-        politicoStore = PoliticoStore.get(dispatcher);
-        comentarioStore = ComentarioStore.get(dispatcher);
+
+        actionsCreator = ActionsCreator.get();
+        comentarioActions = ComentarioActions.get();
+        dialogaActions = DialogaActions.get();
+        politicoActions = PoliticoActions.get();
     }
 
     private void setupView() {
@@ -249,8 +247,92 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void updateCardComparacao() {
-        Comparacao comparacao = politicoStore.getGasto();
+
+    /**
+     * Atualiza a UI depois de uma action
+     * @param event
+     */
+
+
+    @Subscribe
+    public void onMessageEvent(DialogaEvent event){
+        switch (event.getAction()){
+            case DialogaActions.DIALOGA_GET_PERGUNTA_ALETORIA:
+                montaCardDialoga(event);
+                break;
+        }
+    }
+
+
+    @Subscribe
+    public void onMessageEvent(PoliticoEvent event){
+        switch (event.getAction()){
+            case PoliticoActions.POLITICO_GET_COMPARACAO_GASTO:
+                updateCardComparacao(event);
+                break;
+        }
+    }
+
+    @Subscribe
+    public void onMessageEvent(ComentarioEvent event){
+        switch (event.getAction()){
+            case ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO:
+                updateCardComentarioPolitico(event);
+                break;
+            case  ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO:
+                updateCardComentarioProjeto(event);
+                break;
+        }
+    }
+
+
+
+    private void updateCardComentarioProjeto(ComentarioEvent event) {
+        final ParseObject comentario = event.getComentario();
+        final ParseObject projeto =  comentario.getParseObject("proposicao");
+
+        projeto.fetchInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                new Card().montaCardComentario(viewCardComentarioProjeto,comentario,projeto);
+                viewCardComentarioProjeto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getApplicationContext(), ProjetoDetailActivity.class);
+                        intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getNumber("id_proposicao").intValue()));
+                        intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
+                        intent.putExtra("objectId",projeto.getObjectId());
+                        startActivity(intent);
+                    }
+                });
+            }
+        });
+
+
+    }
+
+    private void updateCardComentarioPolitico(ComentarioEvent event) {
+        ParseObject comentario = event.getComentario();
+        final ParseObject politico =  comentario.getParseObject("politico");
+        try {
+            politico.fetchFromLocalDatastore();
+            new Card().montaCardComentario(viewCardComentarioPolitico,comentario);
+            viewCardComentarioPolitico.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
+                    intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
+                    startActivity(intent);
+                }
+            });
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void updateCardComparacao(PoliticoEvent event) {
+        Comparacao comparacao = event.getComparacao();
         final ParseObject politico =  comparacao.getCota().getParseObject("politico");
 
         try {
@@ -274,125 +356,15 @@ public class MainActivity extends AppCompatActivity
         mNestedScroll.scrollTo(0, 0);
 
     }
-    /**
-     * Atualiza a UI depois de uma action
-     * @param event
-     */
-    @Subscribe
-    public void onTodoStoreChange(DialogaStore.DialogaStoreChangeEvent event) {
-        switch (dialogaStore.getEvento()){
-            case DialogaActions.DIALOGA_GET_PERGUNTA_ALETORIA:
-                Pergunta pergunta = dialogaStore.getPergunta();
-                if(null != pergunta)
-                    montaCardDialoga(dialogaStore.getPergunta());
-                break;
-        }
-    }
-
-    @Subscribe
-    public void onTodoStoreChange(PoliticoStore.PoliticoStoreChangeEvent event) {
-        switch (event.getEvento()){
-            case PoliticoActions.POLITICO_GET_COMPARACAO_GASTO:
-                updateCardComparacao();
-                break;
-        }
-    }
-
-    @Subscribe
-    public void onTodoStoreChange(ComentarioStore.ComentarioStoreChangeEvent event) {
-        switch (comentarioStore.getEvento()){
-            case ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO:
-                updateCardComentarioPolitico();
-                break;
-            case ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO:
-                updateCardComentarioProjeto();
-                break;
-        }
-    }
-
-    private void updateCardComentarioProjeto() {
-        final ParseObject comentario = comentarioStore.getComentario();
-        final ParseObject projeto =  comentario.getParseObject("proposicao");
-
-        projeto.fetchInBackground(new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                new Card().montaCardComentario(viewCardComentarioProjeto,comentario,projeto);
-                viewCardComentarioProjeto.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getApplicationContext(), ProjetoDetailActivity.class);
-                        intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getNumber("id_proposicao").intValue()));
-                        intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
-                        intent.putExtra("objectId",projeto.getObjectId());
-                        startActivity(intent);
-                    }
-                });
-            }
-        });
-
-
-    }
-
-    private void updateCardComentarioPolitico() {
-        ParseObject comentario = comentarioStore.getComentario();
-        final ParseObject politico =  comentario.getParseObject("politico");
-        try {
-            politico.fetchFromLocalDatastore();
-            new Card().montaCardComentario(viewCardComentarioPolitico,comentario);
-            viewCardComentarioPolitico.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
-                    intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
-                    startActivity(intent);
-                }
-            });
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if(ParseUser.getCurrentUser()!=null)
-            setupHeader();
-    }
-
-    @Override
-    public void onStart(){
-        super.onStart();
-        dispatcher.register(this);
-        dispatcher.register(dialogaStore);
-        dispatcher.register(politicoStore);
-        dispatcher.register(comentarioStore);
-    }
-    @Override
-    public void onStop(){
-        super.onStop();
-        dispatcher.unregister(this);
-        dispatcher.unregister(dialogaStore);
-        dispatcher.unregister(politicoStore);
-        dispatcher.unregister(comentarioStore);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
 
     /**
      * Monta o card Dialoga
-     * @param pergunta
+     * @param event
      */
-    private void montaCardDialoga(Pergunta pergunta) {
+    private void montaCardDialoga(DialogaEvent event) {
         pbDialoga.setVisibility(View.GONE);
         //monta o topo
-        final ParseObject mPergunta = pergunta.getPergunta();
+        final ParseObject mPergunta = event.getPergunta();
         ParseObject mTema = (ParseObject) mPergunta.get("tema");
 
         TextView txtTema = (TextView) findViewById(R.id.txtNomeTema);
@@ -406,7 +378,7 @@ public class MainActivity extends AppCompatActivity
 
         //preenche a pergunta
         TextView txtPergunta = (TextView) findViewById(R.id.txtPergunta);
-        txtPergunta.setText(pergunta.getPergunta().getString("texto"));
+        txtPergunta.setText(mPergunta.getString("texto"));
 
         //evento do botao para ir para activity dialoga
         Button btnDialoga = (Button) findViewById(R.id.btnDialoga);
@@ -432,6 +404,16 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+    }
+
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(ParseUser.getCurrentUser()!=null)
+            setupHeader();
     }
 
     @Override

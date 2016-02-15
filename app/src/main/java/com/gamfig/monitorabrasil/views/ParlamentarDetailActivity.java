@@ -20,9 +20,9 @@ import com.crashlytics.android.answers.ContentViewEvent;
 import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
+import com.gamfig.monitorabrasil.actions.PoliticoActions;
+import com.gamfig.monitorabrasil.actions.UserActions;
 import com.gamfig.monitorabrasil.application.AppController;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.stores.PoliticoStore;
 import com.gamfig.monitorabrasil.views.fragments.FichaFragment;
 import com.gamfig.monitorabrasil.views.fragments.GastosFragment;
 import com.gamfig.monitorabrasil.views.fragments.ProjetosFragment;
@@ -30,7 +30,6 @@ import com.gamfig.monitorabrasil.views.fragments.TwitterFragment;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
-import com.squareup.otto.Bus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +46,9 @@ import java.util.List;
 public class ParlamentarDetailActivity extends AppCompatActivity {
     public static final String ID_POLITICO = "id_politico";
     private ParseObject politico;
-    private Dispatcher dispatcher;
     private ActionsCreator actionsCreator;
-    private PoliticoStore politicoStore;
+    private PoliticoActions politicoActions;
+    private UserActions userActions;
     private boolean estaMonitorando;
 
     /**
@@ -113,7 +112,7 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
             }
         });
 
-        estaMonitorando = actionsCreator.estaMonitorando(politico);
+        estaMonitorando = userActions.estaMonitorando(politico);
         final FloatingActionButton fabMonitorar = (FloatingActionButton) findViewById(R.id.fabMonitorar);
         fabMonitorar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,7 +134,7 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
 
                     }
                     try {
-                        actionsCreator.salvaUsuarioPolitico(politico, estaMonitorando);
+                        userActions.salvaUsuarioPolitico(politico, estaMonitorando);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -180,16 +179,13 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
                     getIntent().getStringExtra(ParlamentarDetailFragment.ARG_ITEM_ID));
             ParlamentarDetailFragment fragment = new ParlamentarDetailFragment();
             fragment.setArguments(arguments);
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.parlamentar_detail_container, fragment)
-//                    .commit();
         }
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        politicoStore = PoliticoStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        politicoActions = PoliticoActions.get();
+        userActions = UserActions.get();
     }
 
 

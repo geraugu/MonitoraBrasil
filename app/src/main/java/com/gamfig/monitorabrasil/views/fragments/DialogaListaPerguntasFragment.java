@@ -24,20 +24,20 @@ import android.widget.TextView;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
+import com.gamfig.monitorabrasil.POJO.DialogaEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
 import com.gamfig.monitorabrasil.application.AppController;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
 import com.gamfig.monitorabrasil.model.Tema;
-import com.gamfig.monitorabrasil.stores.DialogaStore;
 import com.gamfig.monitorabrasil.views.LoginActivity;
 import com.gamfig.monitorabrasil.views.adapters.PerguntaAdapter;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -62,9 +62,10 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
     private int cor;
     private String idTema;
 
-    private Dispatcher dispatcher;
+
     private ActionsCreator actionsCreator;
-    private DialogaStore dialogaStore;
+    private DialogaActions dialogaActions;
+    private DialogaEvent dialogaEvent;
 
     private OnFragmentInteractionListener mListener;
 
@@ -129,15 +130,14 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
         setupView(view);
 
         //busca a ultima pergunta ou a mais votada ou a que est� finalizando
-        actionsCreator.getPerguntas(idTema);
+        dialogaActions.getPerguntas(idTema);
 
         return view;
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        dialogaStore = DialogaStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        dialogaActions = DialogaActions.get();
     }
 
 
@@ -183,7 +183,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
                         if (ParseUser.getCurrentUser() != null) {
                             if (!pergunta.isEmpty()) {
                                 //inserir resposta para votacao
-                                actionsCreator.enviarPergunta(pergunta, idTema);
+                                dialogaActions.enviarPergunta(pergunta, idTema);
                             } else {
                                 Snackbar.make(getView(), "Insira uma pergunta", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
@@ -216,33 +216,27 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
     }
 
     private void updateUI() {
-        mAdapter.setItems(dialogaStore.getPerguntas());
+        mAdapter.setItems(dialogaEvent.getPerguntas());
     }
 
-    private void carregaLista() {
-        mAdapter.setItems(dialogaStore.getResultado());
-        pb.setVisibility(View.GONE);
-    }
+
 
     /**
      * Atualiza a UI depois de uma action
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(DialogaStore.DialogaStoreChangeEvent event) {
-        String evento = dialogaStore.getEvento();
-        switch (evento){
+    public void onMessageEvent(DialogaEvent event){
+        dialogaEvent=event;
+        switch (dialogaEvent.getAction()){
             case DialogaActions.DIALOGA_GET_PERGUNTAS:
                 updateUI();
                 break;
             case DialogaActions.DIALOGA_ENVIAR_PERGUNTA:
-                actionsCreator.getPerguntas(idTema);
+                dialogaActions.getPerguntas(idTema);
                 break;
         }
     }
-
-
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -253,7 +247,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
 
     @Override
     public void onClickListener(View view, int position) {
-        ParseObject pergunta = dialogaStore.getPerguntas().get(position);
+        ParseObject pergunta = dialogaEvent.getPerguntas().get(position);
 
         Answers.getInstance().logCustom(new CustomEvent("TouchPergunta")
                 .putCustomAttribute("pergunta", pergunta.getObjectId()));
@@ -302,17 +296,15 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-       dispatcher.register(dialogaStore);
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(dialogaStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
 }

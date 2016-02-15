@@ -19,17 +19,18 @@ import android.widget.ProgressBar;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.ContentViewEvent;
+import com.gamfig.monitorabrasil.POJO.ProjetoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
+import com.gamfig.monitorabrasil.actions.ProjetoActions;
 import com.gamfig.monitorabrasil.interfaces.RecyclerViewOnClickListenerHack;
-import com.gamfig.monitorabrasil.stores.ProjetoStore;
 import com.gamfig.monitorabrasil.views.adapters.ProjetoAdapter;
 import com.gamfig.monitorabrasil.views.dialogs.DialogFiltro;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * An activity representing a list of Projetos. This activity
@@ -55,9 +56,11 @@ public class ProjetoListActivity extends AppCompatActivity
      * device.
      */
     private boolean mTwoPane;
-    private Dispatcher dispatcher;
     private ActionsCreator actionsCreator;
-    private ProjetoStore projetoStore;
+    private ProjetoActions projetoActions;
+    private ProjetoEvent projetoEvent;
+
+
     private RecyclerView mRecyclerView;
     private ProjetoAdapter mAdapter;
     private ProgressBar pb;
@@ -125,16 +128,16 @@ public class ProjetoListActivity extends AppCompatActivity
                     .findFragmentById(R.id.parlamentar_list))
                     .setActivateOnItemClick(true);
         }
-        projetoStore.limpaProjetos();
-        actionsCreator.getAllProjetos(null,casa, 0);
+       // projetoActions.limpaProjetos();
+        projetoActions.getAllProjetos(null,casa, 0);
 
     }
 
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        projetoStore = ProjetoStore.get(dispatcher);
+
+        actionsCreator = ActionsCreator.get();
+        projetoActions = ProjetoActions.get();
     }
 
 
@@ -173,7 +176,7 @@ public class ProjetoListActivity extends AppCompatActivity
                 if (!loading && (totalItemCount - visibleItemCount)
                         <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
                     //carregar mais projetos
-                    actionsCreator.getAllProjetos(null,casa, previousTotal);
+                    projetoActions.getAllProjetos(null,casa, previousTotal);
 
                     loading = true;
                 }
@@ -200,8 +203,8 @@ public class ProjetoListActivity extends AppCompatActivity
                 @Override
                 public void onDismiss(DialogInterface dialog) {
                     //realizar a busca por uf do autor, partido, ano ou casa
-                    projetoStore.limpaProjetos();
-                    actionsCreator.getAllProjetos(null,casa, 0);
+                    projetoEvent.limpaProjetos();
+                    projetoActions.getAllProjetos(null,casa, 0);
 
 
                 }
@@ -224,7 +227,7 @@ public class ProjetoListActivity extends AppCompatActivity
 
     @Override
     public void onClickListener(View view, int position) {
-        final ParseObject projeto = projetoStore.getProjetos().get(position);
+        final ParseObject projeto = projetoEvent.getProjetos().get(position);
         try {
             projeto.fetchIfNeeded();
         } catch (ParseException e) {
@@ -263,22 +266,10 @@ public class ProjetoListActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        dispatcher.register(projetoStore);
-    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(projetoStore);
-    }
 
     private void updateUI() {
-        mAdapter.setItems(projetoStore.getProjetos());
+        mAdapter.setItems(projetoEvent.getProjetos());
         pb.setVisibility(View.GONE);
     }
 
@@ -287,12 +278,22 @@ public class ProjetoListActivity extends AppCompatActivity
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(ProjetoStore.ProjetoStoreChangeEvent event) {
-
+    public void onMessageEvent(ProjetoEvent event){
+        projetoEvent = event;
         updateUI();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
 
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -315,8 +316,8 @@ public class ProjetoListActivity extends AppCompatActivity
                         //realizar a busca
 
                         pb.setVisibility(View.VISIBLE);
-                        projetoStore.limpaProjetos();
-                        actionsCreator.buscaProjetoPorPalavra(query.trim(),casa);
+                        projetoEvent.limpaProjetos();
+                        projetoActions.buscaProjetoPorPalavra(query.trim(),casa);
                         realizouBusca = true;
                     }
 
@@ -326,8 +327,8 @@ public class ProjetoListActivity extends AppCompatActivity
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     if(realizouBusca && newText.isEmpty()){
-                        projetoStore.limpaProjetos();
-                        actionsCreator.getAllProjetos(null,casa, 0);
+                        projetoEvent.limpaProjetos();
+                        projetoActions.getAllProjetos(null,casa, 0);
                         realizouBusca = false;
                     }
                     return false;
