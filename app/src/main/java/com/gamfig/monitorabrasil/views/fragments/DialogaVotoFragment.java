@@ -517,6 +517,8 @@ public class DialogaVotoFragment extends Fragment {
                 break;
             case DialogaActions.DIALOGA_ENVIAR_RESPOSTA:
                 dialogaActions.getPerguntaRespostas(idPergunta);
+                Snackbar.make(getView(), "Resposta inserida ;)", Snackbar.LENGTH_LONG)
+                        .show();
                 break;
             case DialogaActions.DIALOGA_GET_RESULTADO:
                 carregaLista();

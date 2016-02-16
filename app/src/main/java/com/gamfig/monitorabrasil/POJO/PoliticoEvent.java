@@ -5,6 +5,7 @@ import com.gamfig.monitorabrasil.model.Comparacao;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,7 +47,10 @@ public class PoliticoEvent extends Event{
     }
 
     public  List<ParseObject> filtrar(String query, boolean ranking){
-        politicosFiltro.clear();
+        if(politicosFiltro!= null)
+            politicosFiltro.clear();
+        else
+            politicosFiltro = new ArrayList<>();
         for (int i = 0; i < politicos.size(); i++) {
             if(ranking){
                 try {
@@ -86,7 +90,9 @@ public class PoliticoEvent extends Event{
     }
 
     public List<ParseObject> getPoliticos() {
-        return politicos;
+        for(int i=0; i < politicos.size();i++){
+            politicos.get(i).put("pos",String.valueOf((i+1)));
+        } return politicos;
     }
 
     public void setPoliticos(List<ParseObject> politicos) {

@@ -151,7 +151,7 @@ public class ParlamentarListActivity extends AppCompatActivity
     private void initDependencies() {
 
         actionsCreator = ActionsCreator.get();
-        politicoActions = PoliticoActions.get();
+        politicoActions = new PoliticoActions();
     }
 
 
@@ -317,9 +317,10 @@ public class ParlamentarListActivity extends AppCompatActivity
                 if(event.getErro()!= null){
                     Toast.makeText(getApplicationContext(),"Erro ao buscar informação :(",Toast.LENGTH_SHORT).show();
                 }
+                updateUI(event);
                 break;
         }
-        updateUI(event);
+
     }
 
 

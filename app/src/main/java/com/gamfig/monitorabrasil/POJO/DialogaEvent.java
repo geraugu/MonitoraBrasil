@@ -13,6 +13,7 @@ public class DialogaEvent extends Event{
     private ParseObject pergunta;
     private List<ParseObject> perguntas;
     private List<ParseObject> resultado;
+    private List<ParseObject> temas;
     private Pergunta perguntaResposta;
 
     public DialogaEvent(String erro) {
@@ -35,12 +36,20 @@ public class DialogaEvent extends Event{
             case DialogaActions.DIALOGA_GET_RESULTADO:
                 resultado = list;
                 break;
+            case DialogaActions.DIALOGA_GET_TEMAS:
+                temas = list;
+                break;
         }
     }
 
     public DialogaEvent(String action, Pergunta perguntaResposta, String erro) {
         this.action = action;
         this.perguntaResposta = perguntaResposta;
+        this.erro = erro;
+    }
+
+    public DialogaEvent(String action, String  erro) {
+        this.action = action;
         this.erro = erro;
     }
 
@@ -62,5 +71,9 @@ public class DialogaEvent extends Event{
 
     public Pergunta getPerguntaResposta() {
         return perguntaResposta;
+    }
+
+    public List<ParseObject> getTemas() {
+        return temas;
     }
 }

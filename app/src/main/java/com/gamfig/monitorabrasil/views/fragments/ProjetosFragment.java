@@ -88,7 +88,7 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
             politico.fetchFromLocalDatastore();
             setupView(rootView);
            // projetoStore.limpaProjetos();
-            projetoActions.getAllProjetos(politico,politico.getString("tipo"),0);
+            projetoActions.getAllProjetos(politico,politico.getString("tipo"),0, null);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -135,7 +135,7 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
                 if (!loading && (totalItemCount - visibleItemCount)
                         <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
                     //carregar mais projetos
-                    projetoActions.getAllProjetos(politico,politico.getString("tipo"), previousTotal);
+                    projetoActions.getAllProjetos(politico,politico.getString("tipo"), previousTotal, projetoEvent.getProjetos());
 
                     loading = true;
                 }

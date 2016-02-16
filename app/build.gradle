@@ -26,8 +26,8 @@ android {
         applicationId "com.gamfig.monitorabrasil"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 65
-        versionName "4.1.3b"
+        versionCode 66
+        versionName "4.1.4"
     }
     buildTypes {
 

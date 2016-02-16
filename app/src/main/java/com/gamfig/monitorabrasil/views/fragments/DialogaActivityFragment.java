@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
@@ -38,6 +39,8 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
     private ActionsCreator actionsCreator;
     private DialogaActions dialogaActions;
     private DialogaEvent dialogaEvent;
+
+    private ProgressBar pb;
 
     public DialogaActivityFragment() {
     }
@@ -82,7 +85,7 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
 
 
     private void setupView(View view) {
-
+        pb = (ProgressBar) view.findViewById(R.id.progressBar4);
 //tableview
         mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_temas);
 
@@ -100,8 +103,8 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
 
     private void updateUI() {
 
-        mAdapter.setItems(dialogaEvent.getList());
-//        pb.setVisibility(View.INVISIBLE);
+        mAdapter.setItems(dialogaEvent.getTemas());
+        pb.setVisibility(View.INVISIBLE);
     }
 
 
@@ -132,7 +135,7 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
 
     @Override
     public void onClickListener(View view, int position) {
-        ParseObject tema =  dialogaEvent.getList().get(position);
+        ParseObject tema =  dialogaEvent.getTemas().get(position);
         try {
             tema.pin();
             DialogaListaPerguntasFragment frag = DialogaListaPerguntasFragment.newInstance(

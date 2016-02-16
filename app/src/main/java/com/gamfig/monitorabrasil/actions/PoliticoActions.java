@@ -36,7 +36,7 @@ public class PoliticoActions {
 
     private static PoliticoActions instance;
 
-    PoliticoActions() {
+    public PoliticoActions() {
     }
     public static PoliticoActions get() {
         if (instance == null) {

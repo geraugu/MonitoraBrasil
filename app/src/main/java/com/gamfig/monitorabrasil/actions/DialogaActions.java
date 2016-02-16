@@ -134,7 +134,7 @@ public class DialogaActions {
 
                                     }
                                 });
-                                EventBus.getDefault().post(new DialogaEvent(DIALOGA_ENVIAR_RESPOSTA));
+                                EventBus.getDefault().post(new DialogaEvent(DIALOGA_ENVIAR_RESPOSTA,null));
 
                             } else {
                                 DialogaEvent ce = new DialogaEvent(DIALOGA_ENVIAR_RESPOSTA);

@@ -142,7 +142,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
 
 
     private void setupView(View view) {
-
+        pb = (ProgressBar) view.findViewById(R.id.progressBar5);
         TextView txtTema = (TextView) view.findViewById(R.id.txtNomeTema);
         txtTema.setText(nome);
         LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
@@ -217,6 +217,7 @@ public class DialogaListaPerguntasFragment extends Fragment implements RecyclerV
 
     private void updateUI() {
         mAdapter.setItems(dialogaEvent.getPerguntas());
+        pb.setVisibility(View.INVISIBLE);
     }
 
 

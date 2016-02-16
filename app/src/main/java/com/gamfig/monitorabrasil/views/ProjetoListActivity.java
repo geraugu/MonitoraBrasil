@@ -129,7 +129,7 @@ public class ProjetoListActivity extends AppCompatActivity
                     .setActivateOnItemClick(true);
         }
        // projetoActions.limpaProjetos();
-        projetoActions.getAllProjetos(null,casa, 0);
+        projetoActions.getAllProjetos(null,casa, 0,null);
 
     }
 
@@ -176,7 +176,7 @@ public class ProjetoListActivity extends AppCompatActivity
                 if (!loading && (totalItemCount - visibleItemCount)
                         <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
                     //carregar mais projetos
-                    projetoActions.getAllProjetos(null,casa, previousTotal);
+                    projetoActions.getAllProjetos(null,casa, previousTotal,projetoEvent.getProjetos());
 
                     loading = true;
                 }
@@ -204,7 +204,7 @@ public class ProjetoListActivity extends AppCompatActivity
                 public void onDismiss(DialogInterface dialog) {
                     //realizar a busca por uf do autor, partido, ano ou casa
                     projetoEvent.limpaProjetos();
-                    projetoActions.getAllProjetos(null,casa, 0);
+                    projetoActions.getAllProjetos(null,casa, 0, projetoEvent.getProjetos());
 
 
                 }
@@ -279,8 +279,11 @@ public class ProjetoListActivity extends AppCompatActivity
      */
     @Subscribe
     public void onMessageEvent(ProjetoEvent event){
-        projetoEvent = event;
-        updateUI();
+        if(event.getAction().equals(ProjetoActions.PROJETO_GET_TODOS)
+                || event.getAction().equals(ProjetoActions.PROJETO_GET_PROCURA)) {
+            projetoEvent = event;
+            updateUI();
+        }
     }
 
     @Override
@@ -328,7 +331,7 @@ public class ProjetoListActivity extends AppCompatActivity
                 public boolean onQueryTextChange(String newText) {
                     if(realizouBusca && newText.isEmpty()){
                         projetoEvent.limpaProjetos();
-                        projetoActions.getAllProjetos(null,casa, 0);
+                        projetoActions.getAllProjetos(null,casa, 0,null);
                         realizouBusca = false;
                     }
                     return false;

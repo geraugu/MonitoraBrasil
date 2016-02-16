@@ -85,12 +85,12 @@ public class ProjetoActions {
 
     /**
      * Busca os projetos de um politico ou todos se o idPolitico = null
-     *
-     * @param politico
+     *  @param politico
      * @param casa
      * @param previousTotal
+     * @param projetos
      */
-    public void getAllProjetos(ParseObject politico, String casa, int previousTotal) {
+    public void getAllProjetos(ParseObject politico, String casa, int previousTotal, final List<ParseObject> projetos) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Proposicao");
         query.whereEqualTo("tp_casa",casa);
         if(casa.equals("s"))
@@ -110,7 +110,13 @@ public class ProjetoActions {
             @Override
             public void done(List<ParseObject> list, com.parse.ParseException e) {
                 if (e == null) {
-                    EventBus.getDefault().post(new ProjetoEvent(PROJETO_GET_TODOS, list, null));
+                    if(projetos != null) {
+                        projetos.addAll(list);
+                        EventBus.getDefault().post(new ProjetoEvent(PROJETO_GET_TODOS, projetos, null));
+                    } else{
+                        EventBus.getDefault().post(new ProjetoEvent(PROJETO_GET_TODOS, list, null));
+                    }
+
                 } else {
                     ProjetoEvent ce = new ProjetoEvent(PROJETO_GET_TODOS);
                     ce.setErro(AppController.getInstance().getString(R.string.erro_geral));
