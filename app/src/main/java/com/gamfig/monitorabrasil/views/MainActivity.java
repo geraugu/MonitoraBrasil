@@ -33,6 +33,7 @@ import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.ComentarioActions;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
+import com.gamfig.monitorabrasil.actions.ProjetoActions;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Tema;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     DialogaActions dialogaActions;
     PoliticoActions politicoActions;
     ComentarioActions comentarioActions;
+    ProjetoActions projetoActions;
 
     private NestedScrollView mNestedScroll;
 
@@ -160,8 +162,11 @@ public class MainActivity extends AppCompatActivity
         comentarioActions.getUltimoComentarioProjeto();
 
         //setup headerview
-        if(ParseUser.getCurrentUser()!=null)
+        if(ParseUser.getCurrentUser()!=null) {
             setupHeader();
+            //busca ultimo projeto de um político que está monitorando
+            //projetoActions.getUltimoProjeto();
+        }
 
 
 
@@ -176,6 +181,14 @@ public class MainActivity extends AppCompatActivity
                 intent.putExtra("perguntaId", extras.getString("idPergunta"));
                 intent.putExtra("temaId", extras.getString("idTema"));
                 startActivity(intent);
+            }else{
+                if(extras.getString("casa") != null){
+                    Intent intent = new Intent(this, ProjetoDetailActivity.class);
+                    intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(extras.getString(ProjetoDetailFragment.ARG_ITEM_ID)));
+                    intent.putExtra(ProjetoDetailFragment.ARG_CASA,extras.getString(ProjetoDetailFragment.ARG_CASA));
+
+                    startActivity(intent);
+                }
             }
         }
     }

@@ -12,6 +12,7 @@ import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -29,6 +30,7 @@ public class ProjetoActions {
     public static final String PROJETO_GET_TODOS = "projeto_get_todos";
     public static final String PROJETO_GET_PROCURA = "projeto_get_procura";
     public static final String PROJETO_GET_DETALHE = "projeto_get_detalhe";
+    private static final String PROJETO_GET_ULTIMO_POLITICO_USER = "projeto_get_ultimo_politico_user";
 
     private static ProjetoActions instance;
 
@@ -170,5 +172,39 @@ public class ProjetoActions {
         });
         Answers.getInstance().logSearch(new SearchEvent()
                 .putQuery(chave));
+    }
+
+    public void getUltimoProjeto() {
+        HashMap<String, String> params = new HashMap();
+        params.put("user", ParseUser.getCurrentUser().getObjectId());
+        ParseCloud.callFunctionInBackground("getUltimoProjetoPolMonitorado", params, new FunctionCallback<String>() {
+
+
+            @Override
+            public void done(String jsonString, ParseException e) {
+                if (e == null) {
+                    try {
+                        if(jsonString != null) {
+                            JSONObject json = new JSONObject(jsonString);
+                            if(json.getString("ementa").length()>0){
+                                Projeto projeto = new Projeto(Integer.parseInt(json.getString("id")));
+                                projeto.setNome(json.getString("nome"));
+                                projeto.setEmenta(json.getString("ementa"));
+                                projeto.setNomeAutor(json.getString("autor"));
+                                EventBus.getDefault().post(new ProjetoEvent(PROJETO_GET_ULTIMO_POLITICO_USER, projeto, null));
+                            }
+                        }
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    }
+
+
+                }else{
+                    ProjetoEvent ce = new ProjetoEvent(PROJETO_GET_ULTIMO_POLITICO_USER);
+                    ce.setErro(AppController.getInstance().getString(R.string.erro_geral));
+                    EventBus.getDefault().post(ce);
+                }
+            }
+        });
     }
 }

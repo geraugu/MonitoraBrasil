@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.gamfig.monitorabrasil.util.NotificationUtils;
 import com.gamfig.monitorabrasil.views.MainActivity;
+import com.gamfig.monitorabrasil.views.ProjetoDetailFragment;
 import com.parse.ParsePushBroadcastReceiver;
 
 import org.json.JSONException;
@@ -76,19 +77,33 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
      * @param json
      */
     private void parsePushJson(Context context, JSONObject json) {
+        String idPergunta = null;
+        String idTema = null;
+        int idProjeto = 0;
+        String casa = null;
         try {
             boolean isBackground = json.getBoolean("is_background");
             JSONObject data = json.getJSONObject("data");
             String title = data.getString("titulo");
             String message = data.getString("alerta");
-            String idPergunta = data.getString("pergunta");
-            String idTema = data.getString("idTema");
+            if(data.getString("pergunta")!= null){
+                idPergunta = data.getString("pergunta");
+                idTema = data.getString("idTema");
+            }else{
+                if(data.getString("casa")!= null){
+                    idProjeto = data.getInt("idProjeto");
+                    casa = data.getString("casa");
+                }
+            }
+
 
 
             if (!isBackground) {
                 Intent intent = new Intent(context, MainActivity.class);
                 intent.putExtra("idPergunta", idPergunta);
                 intent.putExtra("idTema", idTema);
+                intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID, idProjeto);
+                intent.putExtra(ProjetoDetailFragment.ARG_CASA, casa);
                 showNotificationMessage(context, title, message, intent);
             }
 
