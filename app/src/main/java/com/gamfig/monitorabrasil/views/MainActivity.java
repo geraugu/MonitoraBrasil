@@ -28,6 +28,7 @@ import com.crashlytics.android.answers.CustomEvent;
 import com.gamfig.monitorabrasil.POJO.ComentarioEvent;
 import com.gamfig.monitorabrasil.POJO.DialogaEvent;
 import com.gamfig.monitorabrasil.POJO.PoliticoEvent;
+import com.gamfig.monitorabrasil.POJO.ProjetoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.ComentarioActions;
@@ -36,6 +37,7 @@ import com.gamfig.monitorabrasil.actions.PoliticoActions;
 import com.gamfig.monitorabrasil.actions.ProjetoActions;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.model.Comparacao;
+import com.gamfig.monitorabrasil.model.Projeto;
 import com.gamfig.monitorabrasil.model.Tema;
 import com.gamfig.monitorabrasil.views.dialogs.DialogGostou;
 import com.gamfig.monitorabrasil.views.util.Card;
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     private View viewCardComparaGasto;
     private View viewCardComentarioPolitico;
     private View viewCardComentarioProjeto;
+    private View viewCardUltimoProjeto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +168,7 @@ public class MainActivity extends AppCompatActivity
         if(ParseUser.getCurrentUser()!=null) {
             setupHeader();
             //busca ultimo projeto de um político que está monitorando
-            //projetoActions.getUltimoProjeto();
+            projetoActions.getUltimoProjeto();
         }
 
 
@@ -242,6 +245,8 @@ public class MainActivity extends AppCompatActivity
         viewCardComparaGasto =  findViewById(R.id.llCardComparaGastos);
         viewCardComentarioPolitico = findViewById(R.id.llCardComentario);
         viewCardComentarioProjeto = findViewById(R.id.llCardComentarioProjeto);
+        viewCardUltimoProjeto = findViewById(R.id.llCardUltimoProjeto);
+        viewCardUltimoProjeto.setVisibility(View.GONE);
     }
 
     private void buscaTweet() {
@@ -299,6 +304,32 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Subscribe
+    public void onMessageEvent(ProjetoEvent event){
+        switch (event.getAction()){
+            case ProjetoActions.PROJETO_GET_ULTIMO_POLITICO_USER:
+                updateCardprojetoPolitico(event);
+                break;
+        }
+    }
+
+
+    private void updateCardprojetoPolitico(ProjetoEvent event) {
+        final Projeto projeto = event.getProjeto();
+        new Card().montaCardProjeto(viewCardUltimoProjeto,projeto);
+        viewCardUltimoProjeto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ProjetoDetailActivity.class);
+                intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getId()));
+                intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getCasa());
+                intent.putExtra("objectId",projeto.getObjectId());
+                startActivity(intent);
+            }
+        });
+        viewCardUltimoProjeto.setVisibility(View.VISIBLE);
+
+    }
 
 
     private void updateCardComentarioProjeto(ComentarioEvent event) {

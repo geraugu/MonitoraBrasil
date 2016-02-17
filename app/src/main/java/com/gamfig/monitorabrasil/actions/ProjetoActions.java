@@ -30,7 +30,7 @@ public class ProjetoActions {
     public static final String PROJETO_GET_TODOS = "projeto_get_todos";
     public static final String PROJETO_GET_PROCURA = "projeto_get_procura";
     public static final String PROJETO_GET_DETALHE = "projeto_get_detalhe";
-    private static final String PROJETO_GET_ULTIMO_POLITICO_USER = "projeto_get_ultimo_politico_user";
+    public static final String PROJETO_GET_ULTIMO_POLITICO_USER = "projeto_get_ultimo_politico_user";
 
     private static ProjetoActions instance;
 
@@ -177,7 +177,7 @@ public class ProjetoActions {
     public void getUltimoProjeto() {
         HashMap<String, String> params = new HashMap();
         params.put("user", ParseUser.getCurrentUser().getObjectId());
-        ParseCloud.callFunctionInBackground("getUltimoProjetoPolMonitorado", params, new FunctionCallback<String>() {
+        ParseCloud.callFunctionInBackground("buscaUltimoProjeto", params, new FunctionCallback<String>() {
 
 
             @Override
@@ -191,6 +191,11 @@ public class ProjetoActions {
                                 projeto.setNome(json.getString("nome"));
                                 projeto.setEmenta(json.getString("ementa"));
                                 projeto.setNomeAutor(json.getString("autor"));
+                                projeto.setCasa(json.getString("casa"));
+                                projeto.setObjectId(json.getString("object_id"));
+                                projeto.setDtApresentacao(json.getString("data"));
+                                projeto.setS(json.getInt("s"));
+                                projeto.setN(json.getInt("n"));
                                 EventBus.getDefault().post(new ProjetoEvent(PROJETO_GET_ULTIMO_POLITICO_USER, projeto, null));
                             }
                         }

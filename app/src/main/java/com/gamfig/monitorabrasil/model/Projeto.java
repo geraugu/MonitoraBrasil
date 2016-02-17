@@ -33,6 +33,7 @@ public class Projeto {
 	private String regime;
 	private String casa;
     private String explicacao;
+	private String objectId;
 
     public String getExplicacao() {
         return explicacao;
@@ -215,6 +216,20 @@ public class Projeto {
 	public void setTipo(String tipo) {
 		this.casa = tipo;
 	}
-	
 
+	public String getCasa() {
+		return casa;
+	}
+
+	public void setCasa(String casa) {
+		this.casa = casa;
+	}
+
+	public String getObjectId() {
+		return objectId;
+	}
+
+	public void setObjectId(String objectId) {
+		this.objectId = objectId;
+	}
 }

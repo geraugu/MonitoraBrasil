@@ -24,7 +24,39 @@
             android:id="@+id/txtPolitico"
             android:layout_marginLeft="6dp" />
         <View style="@style/Divider"/>
-        <include layout="@layout/item_projeto"></include>
+        <TextView
+            android:layout_width="263dp"
+            android:layout_height="wrap_content"
+            android:text="Info"
+            android:id="@+id/txtTitulo"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/data"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/numero"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/autor"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            />
+
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/descricao" />
     </LinearLayout>
 
     </android.support.v7.widget.CardView>
