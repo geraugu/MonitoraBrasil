@@ -68,8 +68,6 @@ public class DialogaActivityFragment extends Fragment implements RecyclerViewOnC
                 ft.addToBackStack("tag");
                 ft.commit();
             }
-
-
         }
 
         dialogaActions.getAllTemas();

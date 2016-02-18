@@ -51,7 +51,8 @@
             <!-- CARD PROJETO MAIS COMENTADO -->
 
             <!-- CARD PROJETO DESTAQUE -->
-            <include layout="@layout/card_projeto" />
+            <include
+                layout="@layout/card_projeto" />
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>

@@ -176,10 +176,8 @@ public class ProjetoActions {
 
     public void getUltimoProjeto() {
         HashMap<String, String> params = new HashMap();
-        params.put("user", ParseUser.getCurrentUser().getObjectId());
+        params.put("id", ParseUser.getCurrentUser().getObjectId());
         ParseCloud.callFunctionInBackground("buscaUltimoProjeto", params, new FunctionCallback<String>() {
-
-
             @Override
             public void done(String jsonString, ParseException e) {
                 if (e == null) {

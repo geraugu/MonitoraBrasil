@@ -236,6 +236,7 @@ public class MainActivity extends AppCompatActivity
         comentarioActions = ComentarioActions.get();
         dialogaActions = DialogaActions.get();
         politicoActions = PoliticoActions.get();
+        projetoActions = ProjetoActions.get();
     }
 
     private void setupView() {

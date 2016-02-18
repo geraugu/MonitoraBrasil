@@ -187,7 +187,8 @@ public class DialogaVotoFragment extends Fragment {
 
 
     private void setupView(View view) {
-
+        LinearLayout ll = (LinearLayout)view.findViewById(R.id.linearLayout);
+        ll.setVisibility(View.GONE);
         TextView txtTema = (TextView) view.findViewById(R.id.txtNomeTema);
         txtTema.setText(nome);
         LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
