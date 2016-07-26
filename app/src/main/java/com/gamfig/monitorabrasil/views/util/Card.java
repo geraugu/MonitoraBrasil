@@ -75,6 +75,7 @@ public class Card {
     }
 
     public void montaCardComentario(View v, ParseObject comentario, ParseObject projeto) {
+
         TextView txtUser = (TextView) v.findViewById(R.id.txtUser);
         TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
         TextView txtHorario = (TextView) v.findViewById(R.id.txtHorario);

@@ -3,18 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp">
+    android:layout_margin="4dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/llCardUltimoProjeto"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="4dp"
+        android:background="@color/cor5">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Projeto"
-            android:layout_marginLeft="5dp"
             android:id="@+id/textView"
             android:textColor="@color/abc_input_method_navigation_guard"
             android:textStyle="bold"

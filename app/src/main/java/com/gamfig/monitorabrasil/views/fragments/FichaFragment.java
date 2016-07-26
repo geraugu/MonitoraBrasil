@@ -102,7 +102,9 @@ public class FichaFragment extends Fragment implements OnChartValueSelectedListe
         //busca as informacoes do politico
         politico = politicoActions.getPolitico(idPolitico);
         setupView(rootView);
-        politicoActions.getComparacaoGasto(politico.getObjectId());
+        if(politico.getNumber("gastos").floatValue() > 0) {
+            politicoActions.getComparacaoGasto(politico.getObjectId());
+        }
         
         //so tem presenca para os deputados
         if(politico.getString("tipo").equals("c"))

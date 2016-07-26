@@ -17,6 +17,7 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
     <permission
         android:name="${applicationId}.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -32,13 +33,9 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".views.MainActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".views.LoginActivity"
@@ -56,6 +53,7 @@
 
         <activity
             android:name=".views.DialogaActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_dialoga"
             android:parentActivityName=".views.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -65,6 +63,7 @@
         </activity>
         <activity
             android:name=".views.ParlamentarListActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_parlamentar_list"
             android:parentActivityName=".views.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -86,27 +85,12 @@
             android:label="@string/title_activity_comentario"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".views.ProjetoListActivity"
-            android:label="@string/title_projeto_list"
-            android:parentActivityName=".views.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.gamfig.monitorabrasil.views.MainActivity" />
-        </activity>
-        <activity
             android:name=".views.ProjetoDetailActivity"
             android:label="@string/title_projeto_detail"
-            android:parentActivityName=".views.ProjetoListActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.gamfig.monitorabrasil.views.ProjetoListActivity" />
-        </activity>
-        <activity android:name=".views.SobreActivity"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".views.SobreActivity" />
 
         <service android:name="com.parse.PushService" />
-
 
         <receiver
             android:name=".receiver.CustomPushReceiver"
@@ -126,18 +110,34 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-
                 <!-- IMPORTANT: Change "com.parse.starter" to match your app's package name. -->
                 <category android:name="com.gamfig.monitorabrasil" />
             </intent-filter>
         </receiver>
 
-
         <meta-data
             android:name="com.parse.push.notification_icon"
             android:resource="@drawable/ic_notification" />
 
+        <activity
+            android:name=".views.TrunfoMain"
+            android:label="@string/title_activity_trunfo_main"
+            android:parentActivityName=".views.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gamfig.monitorabrasil.views.MainActivity" />
+        </activity>
+        <activity
+            android:name=".views_new.Main2Activity"
+            android:label="@string/title_activity_main2"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

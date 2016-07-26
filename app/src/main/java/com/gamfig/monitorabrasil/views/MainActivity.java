@@ -7,77 +7,46 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
-import com.gamfig.monitorabrasil.POJO.ComentarioEvent;
-import com.gamfig.monitorabrasil.POJO.DialogaEvent;
-import com.gamfig.monitorabrasil.POJO.PoliticoEvent;
-import com.gamfig.monitorabrasil.POJO.ProjetoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
-import com.gamfig.monitorabrasil.actions.ComentarioActions;
-import com.gamfig.monitorabrasil.actions.DialogaActions;
 import com.gamfig.monitorabrasil.actions.PoliticoActions;
-import com.gamfig.monitorabrasil.actions.ProjetoActions;
 import com.gamfig.monitorabrasil.application.AppController;
-import com.gamfig.monitorabrasil.model.Comparacao;
-import com.gamfig.monitorabrasil.model.Projeto;
-import com.gamfig.monitorabrasil.model.Tema;
 import com.gamfig.monitorabrasil.views.dialogs.DialogGostou;
-import com.gamfig.monitorabrasil.views.util.Card;
+import com.gamfig.monitorabrasil.views.fragments.ContentMain;
+import com.gamfig.monitorabrasil.views.fragments.ProjetosFragment;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.parse.ConfigCallback;
-import com.parse.GetCallback;
 import com.parse.GetDataCallback;
 import com.parse.ParseConfig;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
-import com.twitter.sdk.android.tweetui.SearchTimeline;
-import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     ActionsCreator actionsCreator;
-    DialogaActions dialogaActions;
     PoliticoActions politicoActions;
-    ComentarioActions comentarioActions;
-    ProjetoActions projetoActions;
-
-    private NestedScrollView mNestedScroll;
-
-    private ProgressBar pbDialoga;
 
     private View headerView;
     private NavigationView navigationView;
 
-    private View viewCardComparaGasto;
-    private View viewCardComentarioPolitico;
-    private View viewCardComentarioProjeto;
-    private View viewCardUltimoProjeto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +71,6 @@ public class MainActivity extends AppCompatActivity
         headerView = getLayoutInflater().inflate(R.layout.nav_header_main, navigationView, false);
         navigationView.addHeaderView(headerView);
         initDependencies();
-        setupView();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabComentario);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -147,52 +115,49 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
-        //monta card do dialoga
-        pbDialoga.setVisibility(View.VISIBLE);
-        dialogaActions.getPerguntaAleatoria();
-
-        //monta o card de gasto
-        politicoActions.getComparacaoGasto(null);
-
-        //tweet search #monitoraBrasil
-        buscaTweet();
-
-        //busca ultimo comentario politico
-        comentarioActions.getUltimoComentarioPolitico(null);
-
-        //busca ultimo comentario politico
-        comentarioActions.getUltimoComentarioProjeto();
-
         //setup headerview
         if(ParseUser.getCurrentUser()!=null) {
             setupHeader();
-            //busca ultimo projeto de um político que está monitorando
-            projetoActions.getUltimoProjeto();
         }
-
-
+        ContentMain frag = ContentMain.newInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if(getSupportFragmentManager().findFragmentByTag("contentMain")==null)
+            ft.add(R.id.fragment_container, frag, "contentMain");
+        else
+            ft.replace(R.id.fragment_container, frag, "contentMain");
+        ft.commit();
 
     }
+
+    private void initDependencies() {
+        actionsCreator = ActionsCreator.get();
+        politicoActions = PoliticoActions.get();
+    }
+
     private void verificaPush() {
         Bundle extras = getIntent().getExtras();
         if(extras != null){
-            if(extras.getString("idPergunta") != null){
-                //abrir a activity
-                Intent intent = new Intent(this,DialogaActivity.class);
+            if(extras.getString("tipo") != null) {
+                String pushTipo = extras.getString("tipo");
+                Intent intent;
+                switch (pushTipo) {
+                    case "dialoga":
+                        intent = new Intent(this, DialogaActivity.class);
 
-                intent.putExtra("perguntaId", extras.getString("idPergunta"));
-                intent.putExtra("temaId", extras.getString("idTema"));
-                startActivity(intent);
-            }else{
-                if(extras.getString("casa") != null){
-                    Intent intent = new Intent(this, ProjetoDetailActivity.class);
-                    intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(extras.getString(ProjetoDetailFragment.ARG_ITEM_ID)));
-                    intent.putExtra(ProjetoDetailFragment.ARG_CASA,extras.getString(ProjetoDetailFragment.ARG_CASA));
+                        intent.putExtra("perguntaId", extras.getString("idPergunta"));
+                        intent.putExtra("temaId", extras.getString("idTema"));
+                        startActivity(intent);
+                        break;
+                    case "projeto":
+                        intent = new Intent(this, ProjetoDetailActivity.class);
+                        intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID, String.valueOf(extras.getInt(ProjetoDetailFragment.ARG_ITEM_ID)));
+                        intent.putExtra(ProjetoDetailFragment.ARG_CASA, extras.getString(ProjetoDetailFragment.ARG_CASA));
 
-                    startActivity(intent);
+                        startActivity(intent);
+                        break;
                 }
             }
+
         }
     }
 
@@ -230,244 +195,11 @@ public class MainActivity extends AppCompatActivity
         // headerView.setBackground(ContextCompat.getDrawable(this, Usuario.buscaImagemTopo()));
     }
 
-    private void initDependencies() {
 
-        actionsCreator = ActionsCreator.get();
-        comentarioActions = ComentarioActions.get();
-        dialogaActions = DialogaActions.get();
-        politicoActions = PoliticoActions.get();
-        projetoActions = ProjetoActions.get();
-    }
-
-    private void setupView() {
-
-        mNestedScroll = (NestedScrollView)findViewById(R.id.nested);
-        pbDialoga = (ProgressBar) findViewById(R.id.pbDialoga);
-        viewCardComparaGasto =  findViewById(R.id.llCardComparaGastos);
-        viewCardComentarioPolitico = findViewById(R.id.llCardComentario);
-        viewCardComentarioProjeto = findViewById(R.id.llCardComentarioProjeto);
-        viewCardUltimoProjeto = findViewById(R.id.llCardUltimoProjeto);
-        viewCardUltimoProjeto.setVisibility(View.GONE);
-    }
-
-    private void buscaTweet() {
-        SearchTimeline searchTimeline = new SearchTimeline.Builder()
-                .query("#monitoraBrasil")
-                .maxItemsPerRequest(1)
-                .build();
-
-        final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(this)
-                .setTimeline(searchTimeline)
-                .build();
-
-
-        ListView lvTwitter = (ListView) findViewById(R.id.card_twitter);
-
-        lvTwitter.setAdapter(adapter);
-
-    }
-
-
-    /**
-     * Atualiza a UI depois de uma action
-     * @param event
-     */
-
-
-    @Subscribe
-    public void onMessageEvent(DialogaEvent event){
-        switch (event.getAction()){
-            case DialogaActions.DIALOGA_GET_PERGUNTA_ALETORIA:
-                montaCardDialoga(event);
-                break;
-        }
-    }
-
-
-    @Subscribe
-    public void onMessageEvent(PoliticoEvent event){
-        switch (event.getAction()){
-            case PoliticoActions.POLITICO_GET_COMPARACAO_GASTO:
-                updateCardComparacao(event);
-                break;
-        }
-    }
-
-    @Subscribe
-    public void onMessageEvent(ComentarioEvent event){
-        switch (event.getAction()){
-            case ComentarioActions.COMENTARIO_POLITICO_GET_ULTIMO:
-                updateCardComentarioPolitico(event);
-                break;
-            case  ComentarioActions.COMENTARIO_PROJETO_GET_ULTIMO:
-                updateCardComentarioProjeto(event);
-                break;
-        }
-    }
-
-    @Subscribe
-    public void onMessageEvent(ProjetoEvent event){
-        switch (event.getAction()){
-            case ProjetoActions.PROJETO_GET_ULTIMO_POLITICO_USER:
-                updateCardprojetoPolitico(event);
-                break;
-        }
-    }
-
-
-    private void updateCardprojetoPolitico(ProjetoEvent event) {
-        final Projeto projeto = event.getProjeto();
-        new Card().montaCardProjeto(viewCardUltimoProjeto,projeto);
-        viewCardUltimoProjeto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ProjetoDetailActivity.class);
-                intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getId()));
-                intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getCasa());
-                intent.putExtra("objectId",projeto.getObjectId());
-                startActivity(intent);
-            }
-        });
-        viewCardUltimoProjeto.setVisibility(View.VISIBLE);
-
-    }
-
-
-    private void updateCardComentarioProjeto(ComentarioEvent event) {
-        final ParseObject comentario = event.getComentario();
-        final ParseObject projeto =  comentario.getParseObject("proposicao");
-
-        projeto.fetchInBackground(new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                new Card().montaCardComentario(viewCardComentarioProjeto,comentario,projeto);
-                viewCardComentarioProjeto.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getApplicationContext(), ProjetoDetailActivity.class);
-                        intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID,String.valueOf(projeto.getNumber("id_proposicao").intValue()));
-                        intent.putExtra(ProjetoDetailFragment.ARG_CASA,projeto.getString("tp_casa"));
-                        intent.putExtra("objectId",projeto.getObjectId());
-                        startActivity(intent);
-                    }
-                });
-            }
-        });
-
-
-    }
-
-    private void updateCardComentarioPolitico(ComentarioEvent event) {
-        ParseObject comentario = event.getComentario();
-        final ParseObject politico =  comentario.getParseObject("politico");
-        try {
-            politico.fetchFromLocalDatastore();
-            new Card().montaCardComentario(viewCardComentarioPolitico,comentario);
-            viewCardComentarioPolitico.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
-                    intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
-                    startActivity(intent);
-                }
-            });
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void updateCardComparacao(PoliticoEvent event) {
-        Comparacao comparacao = event.getComparacao();
-        final ParseObject politico =  comparacao.getCota().getParseObject("politico");
-
-        try {
-            politico.fetchFromLocalDatastore();
-            new Card().montaCardComparacaoGasto(viewCardComparaGasto,politico,comparacao);
-            viewCardComparaGasto.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Answers.getInstance().logCustom(new CustomEvent("TouchCardGasto")
-                            .putCustomAttribute("Politico", politico.getString("nome")));
-
-                    Intent intent = new Intent(getApplicationContext(), ParlamentarDetailActivity.class);
-                    intent.putExtra(ParlamentarDetailActivity.ID_POLITICO,politico.getObjectId());
-                    startActivity(intent);
-                }
-            });
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        mNestedScroll.scrollTo(0, 0);
-
-    }
-
-    /**
-     * Monta o card Dialoga
-     * @param event
-     */
-    private void montaCardDialoga(DialogaEvent event) {
-        pbDialoga.setVisibility(View.GONE);
-        //monta o topo
-        final ParseObject mPergunta = event.getPergunta();
-        ParseObject mTema = (ParseObject) mPergunta.get("tema");
-
-        TextView txtTema = (TextView) findViewById(R.id.txtNomeTema);
-        txtTema.setText(mTema.getString("Nome"));
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
-        linearLayout.setBackgroundResource(Tema.buscaCor(mTema.getString("imagem")));
-        LinearLayout llCardDialoga = (LinearLayout) findViewById(R.id.llCardDialoga);
-        llCardDialoga.setBackgroundResource(Tema.buscaCor(mTema.getString("imagem")));
-        ImageView imgIcone = (ImageView)findViewById(R.id.icone);
-        imgIcone.setBackgroundResource(Tema.buscaIcone(mTema.getString("imagem")));
-
-        //preenche a pergunta
-        TextView txtPergunta = (TextView) findViewById(R.id.txtPergunta);
-        txtPergunta.setText(mPergunta.getString("texto"));
-
-        //evento do botao para ir para activity dialoga
-        Button btnDialoga = (Button) findViewById(R.id.btnDialoga);
-        final Intent intent = new Intent(this,DialogaActivity.class);
-        btnDialoga.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //ir para activity do dialoga e abrir na pergunta selecionada
-
-                try {
-                    mPergunta.pin();
-                    ((ParseObject) mPergunta.get("tema")).pin();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                intent.putExtra("perguntaId", mPergunta.getObjectId());
-                intent.putExtra("temaId", ((ParseObject) mPergunta.get("tema")).getObjectId());
-
-                Answers.getInstance().logCustom(new CustomEvent("TouchCardDialoga")
-                        .putCustomAttribute("Digaloga", mPergunta.getObjectId()));
-
-                startActivity(intent);
-            }
-        });
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        EventBus.getDefault().unregister(this);
-        super.onStop();
-    }
 
     @Override
     public void onResume() {
         super.onResume();
-
         if(ParseUser.getCurrentUser()!=null)
             setupHeader();
     }
@@ -475,14 +207,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (drawer.isDrawerOpen(GravityCompat.START) || getFragmentManager().getBackStackEntryCount() > 0) {
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+            if (getFragmentManager().getBackStackEntryCount() > 0 ){
+                getFragmentManager().popBackStack();
+            }
         } else {
             super.onBackPressed();
         }
     }
 
-    @Override
+  /*  @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
@@ -507,7 +244,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -525,10 +262,19 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra("ordem","nome");
             startActivity(intent);
 
-        } else if (id == R.id.nav_projetos_camara) {
-            Intent intent = new Intent(this,ProjetoListActivity.class);
-            intent.putExtra("casa","c");
-            startActivity(intent);
+        }else if (id == R.id.nav_home) {
+            ContentMain frag = ContentMain.newInstance();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container, frag, "projetosFragment");
+            ft.commit();
+
+        }else if (id == R.id.nav_projetos_monitorados) {
+            ProjetosFragment frag = ProjetosFragment.newInstance(null);
+            frag.setArguments(getIntent().getExtras());
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container, frag, "projetosFragment");
+            ft.addToBackStack(null);
+            ft.commit();
 
         } else if (id == R.id.nav_cotas) {
             Intent intent = new Intent(this,ParlamentarListActivity.class);
@@ -540,10 +286,6 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this,ParlamentarListActivity.class);
             intent.putExtra("casa","s");
             intent.putExtra("ordem","nome");
-            startActivity(intent);
-        }else if (id == R.id.nav_projetos_senado) {
-            Intent intent = new Intent(this,ProjetoListActivity.class);
-            intent.putExtra("casa","s");
             startActivity(intent);
         }else if (id == R.id.nav_cotas_senado) {
             Intent intent = new Intent(this,ParlamentarListActivity.class);
@@ -563,6 +305,10 @@ public class MainActivity extends AppCompatActivity
             sendIntent.setType("text/plain");
             startActivity(sendIntent);
         }
+        /*else if (id == R.id.nav_super_cidadao) {
+            Intent sendIntent = new Intent(this,TrunfoMain.class);
+            startActivity(sendIntent);
+        }*/
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -86,22 +86,22 @@ public class CustomPushReceiver extends ParsePushBroadcastReceiver {
             JSONObject data = json.getJSONObject("data");
             String title = data.getString("titulo");
             String message = data.getString("alerta");
-            if(data.getString("pergunta")!= null){
-                idPergunta = data.getString("pergunta");
-                idTema = data.getString("idTema");
-            }else{
-                if(data.getString("casa")!= null){
+            String pushTipo = data.getString("tipo");
+            switch (pushTipo){
+                case "dialoga":
+                    idPergunta = data.getString("pergunta");
+                    idTema = data.getString("idTema");
+                    break;
+                case "projeto":
                     idProjeto = data.getInt("idProjeto");
                     casa = data.getString("casa");
-                }
+                    break;
             }
-
-
-
             if (!isBackground) {
                 Intent intent = new Intent(context, MainActivity.class);
                 intent.putExtra("idPergunta", idPergunta);
                 intent.putExtra("idTema", idTema);
+                intent.putExtra("tipo", pushTipo);
                 intent.putExtra(ProjetoDetailFragment.ARG_ITEM_ID, idProjeto);
                 intent.putExtra(ProjetoDetailFragment.ARG_CASA, casa);
                 showNotificationMessage(context, title, message, intent);

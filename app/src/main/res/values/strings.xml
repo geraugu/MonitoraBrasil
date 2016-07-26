@@ -75,5 +75,13 @@
     <string name="comentario_projeto">Comentário do Projeto</string>
     <string name="erro_geral">Não foi possível recuperar os registros</string>
     <string name="erro_enviar_comentario">Não foi possível enviar o comentário</string>
+    <string name="acompanhar">Acompanhar</string>
+    <string name="projetos_monitorados" />
+    <string name="camara">Câmara</string>
+    <string name="senado">Senado</string>
+    <string name="monitorados">Monitorados</string>
+    <string name="title_activity_trunfo_main">Super Cidadão</string>
+    <string name="partidas_disponiveis">Partidas disponíveis</string>
+    <string name="title_activity_main2">Main2Activity</string>
 
 </resources>

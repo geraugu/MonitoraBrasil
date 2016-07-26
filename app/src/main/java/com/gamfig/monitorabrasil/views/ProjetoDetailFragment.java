@@ -1,29 +1,34 @@
 package com.gamfig.monitorabrasil.views;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.gamfig.monitorabrasil.POJO.ProjetoEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.ProjetoActions;
+import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.model.Projeto;
+import com.parse.ParseException;
+import com.parse.ParsePush;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-/**
- * A fragment representing a single Projeto detail screen.
- * This fragment is either contained in a {@link ProjetoListActivity}
- * in two-pane mode (on tablets) or a {@link ProjetoDetailActivity}
- * on handsets.
- */
+
 public class ProjetoDetailFragment extends Fragment {
 
 
@@ -38,6 +43,8 @@ public class ProjetoDetailFragment extends Fragment {
     private TextView txtExplicacao;
     private TextView titulo;
     private TextView link;
+    private Switch switchAcompanhar;
+    private Projeto projeto;
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -87,6 +94,7 @@ public class ProjetoDetailFragment extends Fragment {
     }
 
     private void setupView(View view) {
+
         txtDtApresentacao= (TextView) view.findViewById(R.id.txtDtApresentacao);
         txtAutor= (TextView) view.findViewById(R.id.txtAutor);
         txtSituacao= (TextView) view.findViewById(R.id.txtSituacao);
@@ -96,6 +104,30 @@ public class ProjetoDetailFragment extends Fragment {
         txtExplicacao= (TextView) view.findViewById(R.id.txtExplicacao);
         titulo= (TextView) view.findViewById(R.id.title);
         link= (TextView) view.findViewById(R.id.link);
+        switchAcompanhar = (Switch)view.findViewById(R.id.switchAcompanhar);
+
+        switchAcompanhar.setChecked(projetoActions.estaAcompanhando(Integer.parseInt(getArguments().getString(ARG_ITEM_ID))));
+
+        switchAcompanhar.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+                if(ParseUser.getCurrentUser() != null){
+                    projetoActions.salvaProjetoFavorito(projeto.getId(),b);
+                }else{
+                    Snackbar.make(getView(), "Para salvar é necessário estar logado", Snackbar.LENGTH_LONG)
+                            .setAction("Logar", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(AppController.getInstance(),LoginActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    AppController.getInstance().startActivity(intent);
+                                }
+                            }).show();
+                }
+            }
+        });
+
     }
 
     /**
@@ -109,7 +141,7 @@ public class ProjetoDetailFragment extends Fragment {
 
 
     private void updateUI(ProjetoEvent event) {
-        Projeto projeto = event.getProjeto();
+        projeto = event.getProjeto();
         titulo.setText(projeto.getNome());
         txtDtApresentacao.setText(projeto.getDtApresentacao());
         txtAutor.setText(projeto.getNomeAutor());

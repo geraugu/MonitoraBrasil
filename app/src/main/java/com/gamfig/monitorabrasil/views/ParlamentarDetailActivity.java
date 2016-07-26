@@ -72,8 +72,6 @@ public class ParlamentarDetailActivity extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-
         try {
             politico.fetchIfNeeded();
             Answers.getInstance().logContentView(new ContentViewEvent()

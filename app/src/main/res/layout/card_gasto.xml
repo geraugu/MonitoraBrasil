@@ -9,7 +9,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:id="@+id/llCardComparaGastos"
-        android:paddingLeft="8dp">
+        android:paddingLeft="8dp"
+        android:background="#e4bc8e">
         <TextView
 
             android:text="@string/titulo_gasto"

@@ -115,6 +115,7 @@ public class DialogaActions {
                                     ParseObject tema = (ParseObject) pergunta.get("tema");
                                     data.put("is_background", false);
                                     json.put("idTema", tema.getObjectId());
+                                    json.put("tipo", "dialoga");
                                     json.put("pergunta", pergunta.getObjectId());
                                     json.put("alerta", "Nova resposta para a pergunta: " + pergunta.getString("texto"));
                                     json.put("titulo", AppController.getInstance().getString(R.string.title_activity_dialoga ));

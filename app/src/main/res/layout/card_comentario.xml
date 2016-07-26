@@ -3,12 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp">
+    android:layout_margin="4dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/llCardComentario"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/accent_material_dark">
 
         <TextView
             android:layout_width="wrap_content"

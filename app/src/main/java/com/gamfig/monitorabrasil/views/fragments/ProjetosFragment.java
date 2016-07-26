@@ -1,14 +1,24 @@
 package com.gamfig.monitorabrasil.views.fragments;
 
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.Switch;
 
 import com.gamfig.monitorabrasil.POJO.ProjetoEvent;
 import com.gamfig.monitorabrasil.R;
@@ -41,13 +51,22 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
     private ProjetoActions projetoActions;
     private ProjetoEvent projetoEvent;
 
+    private Switch swCamara;
+    private Switch swSenado;
+    private Switch swMonitorados;
+
     private RecyclerView mRecyclerView;
     private ProjetoAdapter mAdapter;
     private int previousTotal = 0;
     private boolean loading = true;
     private int visibleThreshold = 2;
     int firstVisibleItem, visibleItemCount, totalItemCount;
+    boolean camara,senado,monitorado;
 
+    private LinearLayout llFiltro;
+    private ProgressBar pb;
+
+    private boolean realizouBusca;
 
 
     public ProjetosFragment() {
@@ -82,27 +101,82 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_projetos, container, false);
         initDependencies();
-        //busca as informacoes do politico
-        politico = ParseObject.createWithoutData("Politico",idPolitico);
-        try {
-            politico.fetchFromLocalDatastore();
-            setupView(rootView);
-           // projetoStore.limpaProjetos();
-            projetoActions.getAllProjetos(politico,politico.getString("tipo"),0, null);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        setupView(rootView);
+        if(idPolitico != null){
+            llFiltro.setVisibility(View.GONE);
+            politico = ParseObject.createWithoutData("Politico",idPolitico);
+            try {
+                politico.fetchFromLocalDatastore();
+
+                // projetoStore.limpaProjetos();
+                projetoActions.getAllProjetos(politico,politico.getString("tipo"),0, null);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }else{
+            projetoActions.getAllProjetos(camara,senado,monitorado, previousTotal, null);
+        }
+
+        pb.setVisibility(View.VISIBLE);
+
+        setHasOptionsMenu(true);
+        return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        inflater.inflate(R.menu.menu_lista_projetos, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+
+        SearchView searchView = null;
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    if (!query.isEmpty()) {
+                        //realizar a busca
+
+                        pb.setVisibility(View.VISIBLE);
+                        projetoEvent.limpaProjetos();
+                        projetoActions.buscaProjetoPorPalavra(query.trim(),camara,senado,monitorado);
+                        realizouBusca = true;
+                    }
+
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if(realizouBusca && newText.isEmpty()){
+                        projetoEvent.limpaProjetos();
+                        projetoActions.getAllProjetos(camara,senado,monitorado, 0, null);
+                        realizouBusca = false;
+                    }
+                    return false;
+                }
+            });
         }
 
 
-        return rootView;
     }
 
     private void initDependencies() {
         actionsCreator = ActionsCreator.get();
         projetoActions = ProjetoActions.get();
+        camara = true;
+        senado = true;
     }
 
     private void setupView(View rootView) {
+        pb = (ProgressBar)rootView.findViewById(R.id.progressBar7);
+        llFiltro = (LinearLayout)rootView.findViewById(R.id.llFiltro);
 
         //tableview
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.rec_projetos);
@@ -135,10 +209,56 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
                 if (!loading && (totalItemCount - visibleItemCount)
                         <= (firstVisibleItem + visibleThreshold) && totalItemCount > 14) {
                     //carregar mais projetos
-                    projetoActions.getAllProjetos(politico,politico.getString("tipo"), previousTotal, projetoEvent.getProjetos());
+                    if(idPolitico != null){
+                        projetoActions.getAllProjetos(politico,politico.getString("tipo"), previousTotal, projetoEvent.getProjetos());
+                    }else{
+                        projetoActions.getAllProjetos(camara,senado,monitorado, previousTotal, projetoEvent.getProjetos());
+                    }
 
                     loading = true;
                 }
+            }
+        });
+        swCamara = (Switch) rootView.findViewById(R.id.swCamara);
+        swSenado = (Switch) rootView.findViewById(R.id.swSenado);
+        swMonitorados = (Switch) rootView.findViewById(R.id.swMonitorados);
+
+        swCamara.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    camara = true;
+                }else{
+                    camara = false;
+                }
+                pb.setVisibility(View.VISIBLE);
+                projetoActions.getAllProjetos(camara,senado,monitorado, 0, null);
+            }
+        });
+
+        swSenado.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    senado = true;
+                }else{
+                    senado = false;
+                }
+                pb.setVisibility(View.VISIBLE);
+                projetoActions.getAllProjetos(camara,senado,monitorado, 0, null);
+            }
+        });
+
+        swMonitorados.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    monitorado = true;
+                }else{
+                    monitorado = false;
+                }
+                pb.setVisibility(View.VISIBLE);
+                projetoActions.getAllProjetos(camara,senado,monitorado, 0, null);
             }
         });
 
@@ -147,6 +267,7 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
 
 
     private void updateUI() {
+        pb.setVisibility(View.INVISIBLE);
         List<ParseObject> projetos = projetoEvent.getProjetos();
         mAdapter.setItems(projetos);
 
@@ -158,8 +279,11 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
      */
     @Subscribe
     public void onMessageEvent(ProjetoEvent event){
-        projetoEvent = event;
-        updateUI();
+        if(event.getAction().equals(ProjetoActions.PROJETO_GET_TODOS)
+                || event.getAction().equals(ProjetoActions.PROJETO_GET_PROCURA)) {
+            projetoEvent = event;
+            updateUI();
+        }
     }
 
     // This method will be called when a SomeOtherEvent is posted
@@ -190,4 +314,5 @@ public class ProjetosFragment extends Fragment implements RecyclerViewOnClickLis
         intent.putExtra("objectId",projeto.getObjectId());
         startActivity(intent);
     }
+
 }
