@@ -14,9 +14,8 @@ import android.widget.Spinner;
 
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
-import com.gamfig.monitorabrasil.stores.UserStore;
-import com.squareup.otto.Bus;
+import com.gamfig.monitorabrasil.actions.PoliticoActions;
+import com.gamfig.monitorabrasil.actions.UserActions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,9 +35,10 @@ public class DialogFiltro extends DialogFragment {
     private DialogInterface.OnDismissListener onDismissListener;
 
 
-    private Dispatcher dispatcher;
+
     private ActionsCreator actionsCreator;
-    private UserStore userStore;
+    private UserActions userActions;
+    private PoliticoActions politicoActions;
 
     private Spinner spnUf;
     private Spinner spnPartido;
@@ -80,9 +80,9 @@ public class DialogFiltro extends DialogFragment {
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        userStore = UserStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        userActions = UserActions.get();
+        politicoActions = PoliticoActions.get();
     }
 
 
@@ -125,7 +125,7 @@ public class DialogFiltro extends DialogFragment {
         //spinner Partido
         ArrayList<String> arrayStrings = new ArrayList<String>();
         arrayStrings.add(0,"Todos Partidos");
-        arrayStrings.addAll(actionsCreator.getPartidos(false));
+        arrayStrings.addAll(politicoActions.getPartidos(false));
         ArrayAdapter<String> adapterPartido = new ArrayAdapter<String>(getContext(),
                 android.R.layout.simple_spinner_item, arrayStrings);
         adapterPartido.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -160,7 +160,7 @@ public class DialogFiltro extends DialogFragment {
         //spinner Categoria
         ArrayList<String> arrayCategoria = new ArrayList<String>();
         arrayCategoria.add(0,"Todas Categorias");
-        arrayCategoria.addAll(actionsCreator.getCategoriasCotas(casa,false));
+        arrayCategoria.addAll(politicoActions.getCategoriasCotas(casa,false));
         ArrayAdapter<String> adapterCategoria = new ArrayAdapter<String>(getContext(),
                 android.R.layout.simple_spinner_item, arrayCategoria);
         adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -288,22 +288,5 @@ public class DialogFiltro extends DialogFragment {
         //dispatcher.register(this);
         //dispatcher.register(userStore);
     }
-    @Override
-    public void onResume() {
-        super.onResume();
-        dispatcher.register(this);
-        try {
-            dispatcher.register(userStore);
-        }catch (Exception e){
 
-        }
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(userStore);
-    }
 }

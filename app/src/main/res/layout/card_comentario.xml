@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <android.support.v7.widget.CardView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/llCardComentario"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/accent_material_dark">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/comentario"
             android:id="@+id/textView"
+            android:layout_marginLeft="5dp"
             android:textColor="@color/abc_input_method_navigation_guard"
             android:textStyle="bold"
             style="@style/Base.DialogWindowTitle.AppCompat" />
@@ -27,4 +30,4 @@
         <include layout="@layout/item_comentario"></include>
     </LinearLayout>
 
-    </android.support.v7.widget.CardView>
+</android.support.v7.widget.CardView>

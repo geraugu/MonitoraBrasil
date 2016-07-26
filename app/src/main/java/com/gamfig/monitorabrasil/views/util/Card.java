@@ -11,6 +11,7 @@ import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.application.AppController;
 import com.gamfig.monitorabrasil.model.Comparacao;
 import com.gamfig.monitorabrasil.model.Imagens;
+import com.gamfig.monitorabrasil.model.Projeto;
 import com.gamfig.monitorabrasil.util.MyValueFormatter;
 import com.parse.GetDataCallback;
 import com.parse.ParseException;
@@ -28,6 +29,22 @@ import java.util.Date;
 public class Card {
 
     public Card(){}
+
+    public void montaCardProjeto(final View v, final Projeto projeto) {
+        TextView data = (TextView) v.findViewById(R.id.data);
+        TextView autor = (TextView) v.findViewById(R.id.autor);
+        TextView ementa = (TextView) v.findViewById(R.id.descricao);
+        TextView  numero = (TextView) v.findViewById(R.id.txtTitulo);
+        //autor
+        autor.setText(projeto.getNomeAutor());
+        numero.setText(projeto.getNome());
+        if(projeto.getDtApresentacao()!= null) {
+            data.setText(projeto.getDtApresentacao());
+        }
+        ementa.setText(projeto.getEmenta());
+    }
+
+
 
     public void montaCardComparacaoGasto(View mView, ParseObject politico, Comparacao comparacao){
         TextView nomePolitico = (TextView)mView.findViewById(R.id.gasto_deputado);
@@ -58,6 +75,7 @@ public class Card {
     }
 
     public void montaCardComentario(View v, ParseObject comentario, ParseObject projeto) {
+
         TextView txtUser = (TextView) v.findViewById(R.id.txtUser);
         TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
         TextView txtHorario = (TextView) v.findViewById(R.id.txtHorario);
@@ -177,6 +195,7 @@ public class Card {
 
         return ret;
     }
+
 
 
 }

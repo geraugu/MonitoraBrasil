@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.gamfig.monitorabrasil.R;
 import com.twitter.sdk.android.core.AppSession;
@@ -36,6 +37,8 @@ public class TwitterFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mtwitter;
     private String mParam2;
+
+    private ProgressBar pb;
 
 
     public TwitterFragment() {
@@ -73,7 +76,7 @@ public class TwitterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_list_twitter, container, false);
-
+        pb = (ProgressBar)rootView.findViewById(R.id.progressBar6);
 
         if (mtwitter != null) {
             TwitterCore.getInstance().logInGuest(new Callback() {
@@ -87,7 +90,7 @@ public class TwitterFragment extends Fragment {
 
                         @Override
                         public void success(Result<List<Tweet>> listResult) {
-
+                            pb.setVisibility(View.GONE);
                             for (Tweet tweet : listResult.data) {
                                 LinearLayout ln = (LinearLayout) rootView.findViewById(R.id.timeline);
                                 ln.addView(

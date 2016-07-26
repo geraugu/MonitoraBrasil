@@ -148,7 +148,10 @@ public class PoliticoAdapter extends RecyclerView.Adapter<PoliticoAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return politicos.size();
+        if(politicos!=null)
+            return politicos.size();
+        else
+            return 0;
     }
 
     public void setItems(List<ParseObject> politicos) {

@@ -1,5 +1,6 @@
 package com.gamfig.monitorabrasil.views.adapters;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.design.widget.Snackbar;
@@ -180,6 +181,22 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
 
             }
         });
+
+        if(projeto.getString("tp_casa").equals("c")){
+            viewHolder.casa.setText("Câmara");
+            try {
+
+                viewHolder.casa.setBackground(ContextCompat.getDrawable(AppController.getInstance().getApplicationContext(),R.color.cor10));
+            }catch (Exception e){
+
+            }
+
+        }else{
+
+            viewHolder.casa.setText("Senado");
+            viewHolder.casa.setBackground(ContextCompat.getDrawable(AppController.getInstance().getApplicationContext(),R.color.colorPrimaryDark));
+
+        }
     }
 
     private void registraVoto(final View v, ParseObject projeto, final String tipoVoto, final ViewHolder viewHolder2) {
@@ -295,6 +312,7 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
         public TextView descricao;
         public TextView numApoio;
         public TextView numNaoApoio;
+        public TextView casa;
         public TextView numero;
         public Button btnConcordo;
         public Button btnDiscordo;
@@ -309,6 +327,7 @@ public class ProjetoAdapter extends RecyclerView.Adapter<ProjetoAdapter.ViewHold
             numApoio = (TextView) v.findViewById(R.id.txtNumApoio);
             numNaoApoio = (TextView) v.findViewById(R.id.txtNumNaoApoio);
             descricao = (TextView) v.findViewById(R.id.descricao);
+            casa = (TextView) v.findViewById(R.id.casa);
             btnConcordo = (Button) v.findViewById(R.id.btnConcordo);
             btnDiscordo = (Button) v.findViewById(R.id.btnDiscordo);
             btnComentar = (Button) v.findViewById(R.id.btnComentar);

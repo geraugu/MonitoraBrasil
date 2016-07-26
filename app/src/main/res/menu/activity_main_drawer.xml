@@ -3,8 +3,14 @@
 
 
     <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_home" android:icon="@drawable/ic_action_home"
+            android:title="Home" />
         <item android:id="@+id/nav_dialoga" android:icon="@mipmap/ic_dialoga"
             android:title="Dialoga, Cidadão!" />
+    <!--    <item android:id="@+id/nav_super_cidadao" android:icon="@mipmap/ic_dialoga"
+            android:title="Super Cidadão" /> -->
+        <item android:id="@+id/nav_projetos_monitorados" android:icon="@mipmap/ic_nav_projetos"
+            android:title="Projetos" />
     </group>
     <item android:title="Câmara dos Deputados">
         <menu>
@@ -12,8 +18,7 @@
                 android:title="Deputados" />
             <item android:id="@+id/nav_cotas" android:icon="@mipmap/ic_nav_gasto"
                 android:title="Cotas" />
-            <item android:id="@+id/nav_projetos_camara" android:icon="@mipmap/ic_nav_projetos"
-                android:title="Projetos" />
+
         </menu>
     </item>
 
@@ -23,8 +28,7 @@
                 android:title="Senadores" />
             <item android:id="@+id/nav_cotas_senado" android:icon="@mipmap/ic_nav_gasto"
                 android:title="Cotas" />
-            <item android:id="@+id/nav_projetos_senado" android:icon="@mipmap/ic_nav_projetos"
-                android:title="Projetos" />
+
         </menu>
     </item>
     <item android:title="Geral">

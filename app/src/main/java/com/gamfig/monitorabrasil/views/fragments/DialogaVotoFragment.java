@@ -28,14 +28,12 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
+import com.gamfig.monitorabrasil.POJO.DialogaEvent;
 import com.gamfig.monitorabrasil.R;
 import com.gamfig.monitorabrasil.actions.ActionsCreator;
 import com.gamfig.monitorabrasil.actions.DialogaActions;
 import com.gamfig.monitorabrasil.application.AppController;
-import com.gamfig.monitorabrasil.dispatcher.Dispatcher;
 import com.gamfig.monitorabrasil.model.Tema;
-import com.gamfig.monitorabrasil.stores.DialogaStore;
 import com.gamfig.monitorabrasil.views.LoginActivity;
 import com.gamfig.monitorabrasil.views.adapters.ResultadoAdapter;
 import com.parse.GetCallback;
@@ -45,8 +43,9 @@ import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -73,9 +72,10 @@ public class DialogaVotoFragment extends Fragment {
     private String idTema;
     private String idPergunta;
 
-    private Dispatcher dispatcher;
+
     private ActionsCreator actionsCreator;
-    private DialogaStore dialogaStore;
+    private DialogaActions dialogaActions;
+    private DialogaEvent dialogaEvent;
 
     private OnFragmentInteractionListener mListener;
 
@@ -175,20 +175,20 @@ public class DialogaVotoFragment extends Fragment {
         setupView(view);
 
         //busca a ultima pergunta ou a mais votada ou a que est� finalizando
-        actionsCreator.getPerguntaRespostas(idPergunta);
+        dialogaActions.getPerguntaRespostas(idPergunta);
 
         return view;
     }
 
     private void initDependencies() {
-        dispatcher = Dispatcher.get(new Bus());
-        actionsCreator = ActionsCreator.get(dispatcher);
-        dialogaStore = DialogaStore.get(dispatcher);
+        actionsCreator = ActionsCreator.get();
+        dialogaActions = DialogaActions.get();
     }
 
 
     private void setupView(View view) {
-
+        LinearLayout ll = (LinearLayout)view.findViewById(R.id.linearLayout);
+        ll.setVisibility(View.GONE);
         TextView txtTema = (TextView) view.findViewById(R.id.txtNomeTema);
         txtTema.setText(nome);
         LinearLayout linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
@@ -249,7 +249,7 @@ public class DialogaVotoFragment extends Fragment {
                         if(ParseUser.getCurrentUser() != null){
                             if(!resposta.isEmpty()){
                                 //inserir resposta para votacao
-                                actionsCreator.enviarResposta(resposta,pergunta);
+                                dialogaActions.enviarResposta(resposta,pergunta);
                             }else{
                                 Snackbar.make(getView(), "Insira um resposta", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
@@ -299,7 +299,7 @@ public class DialogaVotoFragment extends Fragment {
                         btnConcordo.setBackground(imgapoio);
                         btnDiscordo.setBackground(imgnapoio);
                         //verifica se ja tem voto
-                        ParseObject voto = actionsCreator.getVoto(respostaAtual);
+                        ParseObject voto = dialogaActions.getVoto(respostaAtual);
 
                         if (null != voto) {
                             if (voto.getString("sim_nao").equals("s")) {
@@ -319,7 +319,7 @@ public class DialogaVotoFragment extends Fragment {
                 //TODO mostrar o resultado dos votos das respostas por ordem de mais concordancia
                 rlVoto.setVisibility(View.GONE);
                 rlResultado.setVisibility(View.VISIBLE);
-                actionsCreator.getResultado(pergunta);
+                dialogaActions.getResultado(pergunta);
                 pb.setVisibility(View.VISIBLE);
                 fab.setVisibility(View.VISIBLE);
             }
@@ -330,14 +330,14 @@ public class DialogaVotoFragment extends Fragment {
             public void onClick(View view) {
                 if(null != ParseUser.getCurrentUser()){
                     //verifica se ja vatou
-                    ParseObject voto = actionsCreator.getVoto(respostaAtual);
+                    ParseObject voto = dialogaActions.getVoto(respostaAtual);
                     if(voto == null){
-                        actionsCreator.concordo(respostaAtual, voto);
+                        dialogaActions.concordo(respostaAtual, voto);
                     }else{
                         if(voto.getString("sim_nao").equals("n")){
 
                             btnDiscordo.setBackground(imgnapoio);
-                            actionsCreator.concordo(respostaAtual,voto);
+                            dialogaActions.concordo(respostaAtual,voto);
                         }
                     }
                     btnConcordo.setBackground(apoioVerde);
@@ -363,14 +363,14 @@ public class DialogaVotoFragment extends Fragment {
             public void onClick(View view) {
                 if(null != ParseUser.getCurrentUser()){//verifica se ja vatou
                     //verifica se ja vatou
-                    ParseObject voto = actionsCreator.getVoto(respostaAtual);
+                    ParseObject voto = dialogaActions.getVoto(respostaAtual);
                     if(voto == null){
-                        actionsCreator.discordo(respostaAtual, voto);
+                        dialogaActions.discordo(respostaAtual, voto);
                     }else{
                         if(voto.getString("sim_nao").equals("s")){
 
                             btnConcordo.setBackground(imgapoio);
-                            actionsCreator.discordo(respostaAtual, voto);
+                            dialogaActions.discordo(respostaAtual, voto);
                         }
                     }
                     btnDiscordo.setBackground(napoioVermelho);
@@ -414,8 +414,8 @@ public class DialogaVotoFragment extends Fragment {
     }
 
     private void updateUI() {
-        pergunta = dialogaStore.getPergunta().getPergunta();
-        respostas = dialogaStore.getPergunta().getRespostas();
+        pergunta = dialogaEvent.getPerguntaResposta().getPergunta();
+        respostas = dialogaEvent.getPerguntaResposta().getRespostas();
         if(pergunta != null){
             txtPergunta.setText(pergunta.getString("texto"));
 
@@ -429,7 +429,7 @@ public class DialogaVotoFragment extends Fragment {
                 btnConcordo.setVisibility(View.VISIBLE);
                 btnDiscordo.setVisibility(View.VISIBLE);
                 //verifica se ja tem voto
-                ParseObject voto = actionsCreator.getVoto(respostaAtual);
+                ParseObject voto = dialogaActions.getVoto(respostaAtual);
 
                 if(null != voto){
                     if(voto.getString("sim_nao").equals("s")){
@@ -501,7 +501,7 @@ public class DialogaVotoFragment extends Fragment {
     }
 
     private void carregaLista() {
-        mAdapter.setItems(dialogaStore.getResultado());
+        mAdapter.setItems(dialogaEvent.getResultado());
         pb.setVisibility(View.GONE);
     }
 
@@ -510,23 +510,22 @@ public class DialogaVotoFragment extends Fragment {
      * @param event
      */
     @Subscribe
-    public void onTodoStoreChange(DialogaStore.DialogaStoreChangeEvent event) {
-        String evento = dialogaStore.getEvento();
-        switch (evento){
+    public void onMessageEvent(DialogaEvent event){
+        dialogaEvent = event;
+        switch (event.getAction()){
             case DialogaActions.DIALOGA_GET_PERGUNTA_RESPOSTAS:
                 updateUI();
                 break;
             case DialogaActions.DIALOGA_ENVIAR_RESPOSTA:
-                actionsCreator.getPerguntaRespostas(idPergunta);
-
-
+                dialogaActions.getPerguntaRespostas(idPergunta);
+                Snackbar.make(getView(), "Resposta inserida ;)", Snackbar.LENGTH_LONG)
+                        .show();
                 break;
             case DialogaActions.DIALOGA_GET_RESULTADO:
                 carregaLista();
                 break;
         }
     }
-
 
 
 
@@ -572,22 +571,15 @@ public class DialogaVotoFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        try {
-            dispatcher.register(this);
-            dispatcher.register(dialogaStore);
-        }catch (Exception e){
-            Crashlytics.log(0,"error","Erro no registro do dialogaStore - DialogaVotoFragment");
-        }
-
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        dispatcher.unregister(this);
-        dispatcher.unregister(dialogaStore);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
 }
